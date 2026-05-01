@@ -12,37 +12,37 @@ interface Pergunta {
 const PERGUNTAS: Pergunta[] = [
   {
     id: 1,
-    texto: 'Maria tem um bolo dividido em 8 fatias iguais. Ela separou 3 fatias. Qual a fração?',
+    texto: 'Maria tem uma pizza dividida em 8 pedaços iguais. Ela separou 3 pedaços. Qual é a fração?',
     numeradorCorreto: 3,
     denominadorCorreto: 8,
   },
   {
     id: 2,
-    texto: 'João dividiu o bolo em 4 fatias e separou 1. Qual a fração?',
+    texto: 'João dividiu a pizza em 4 pedaços e separou 1. Qual é a fração?',
     numeradorCorreto: 1,
     denominadorCorreto: 4,
   },
   {
     id: 3,
-    texto: 'Ana dividiu o bolo em 10 fatias e separou 6. Qual a fração?',
+    texto: 'Ana dividiu a pizza em 10 pedaços e separou 6. Qual é a fração?',
     numeradorCorreto: 6,
     denominadorCorreto: 10,
   },
   {
     id: 4,
-    texto: 'Pedro dividiu o bolo em 6 fatias e separou 2. Qual a fração?',
+    texto: 'Pedro dividiu a pizza em 6 pedaços e separou 2. Qual é a fração?',
     numeradorCorreto: 2,
     denominadorCorreto: 6,
   },
   {
     id: 5,
-    texto: 'Carla dividiu o bolo em 10 fatias e separou 9. Qual a fração?',
+    texto: 'Carla dividiu a pizza em 10 pedaços e separou 9. Qual é a fração?',
     numeradorCorreto: 9,
     denominadorCorreto: 10,
   },
 ];
 
-function BoloComFatias({ numerador, denominador }: { numerador: number; denominador: number }) {
+function PizzaComPedacos({ numerador, denominador }: { numerador: number; denominador: number }) {
   if (denominador === 0) return null;
 
   const raioBorda = 116;
@@ -358,7 +358,7 @@ function BoloComFatias({ numerador, denominador }: { numerador: number; denomina
       <div className="text-center mt-1 text-xs text-muted-foreground">
         {numerador > 0 && (
           <span className="font-semibold">
-            {numerador} de {denominador} fatia{denominador !== 1 ? 's' : ''} destacada{numerador !== 1 ? 's' : ''}
+            {numerador} de {denominador} pedaço{denominador !== 1 ? 's' : ''} destacado{numerador !== 1 ? 's' : ''}
           </span>
         )}
       </div>
@@ -509,7 +509,7 @@ export function FractionsGame() {
               <p className="text-xs italic">Ajuste o denominador para ver a pizza</p>
             </div>
           ) : (
-            <BoloComFatias numerador={numerador} denominador={denominador} />
+            <PizzaComPedacos numerador={numerador} denominador={denominador} />
           )}
         </div>
 

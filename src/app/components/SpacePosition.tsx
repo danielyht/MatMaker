@@ -310,40 +310,38 @@ export function SpacePosition() {
       (n) => !navesReais.some((nr) => nr.nome === n.nome && nr.posicao === n.posicao),
     );
     
-    // Função para verificar se uma posição está muito próxima de outras naves
-    function estaProxima(x, y, navesExistentes, distanciaMinima = 14) {
-      return navesExistentes.some(nave => {
+    // Distância mínima entre centros (% do canvas). No celular os ícones são grandes em px —
+    // valores maiores evitam naves “grudadas”.
+    function estaProxima(x, y, navesExistentes, distanciaMinima = 26) {
+      return navesExistentes.some((nave) => {
         const distanciaX = Math.abs(nave.x - x);
         const distanciaY = Math.abs(nave.y - y);
         const distancia = Math.sqrt(distanciaX ** 2 + distanciaY ** 2);
         return distancia < distanciaMinima;
       });
     }
-    
-    // Função para gerar posição válida (sem sobreposição)
+
+    // Faixas horizontais mais afastadas do centro (zona do laser) para caber melhor no telefone.
     function gerarPosicaoValida(ehDireita, navesExistentes) {
-      const maxTentativas = 100;
+      const maxTentativas = 160;
       let tentativa = 0;
-      
+
       while (tentativa < maxTentativas) {
-        const x = ehDireita 
-          ? Math.random() * 42 + 53  // direita: 53-95%
-          : Math.random() * 42 + 5;   // esquerda: 5-47%
-        const y = Math.random() * 70 + 15; // 15-85%
-        
+        const x = ehDireita
+          ? Math.random() * 33 + 62 // direita: 62–95%
+          : Math.random() * 33 + 5; // esquerda: 5–38%
+        const y = Math.random() * 66 + 14; // 14–80%
+
         if (!estaProxima(x, y, navesExistentes)) {
           return { x, y };
         }
-        
+
         tentativa++;
       }
-      
-      // Fallback com posições mais garantidas
-      const fallbackX = ehDireita 
-        ? 70 + (Math.random() * 15)
-        : 15 + (Math.random() * 15);
-      const fallbackY = 30 + (Math.random() * 40);
-      
+
+      const fallbackX = ehDireita ? 66 + Math.random() * 26 : 6 + Math.random() * 26;
+      const fallbackY = 22 + Math.random() * 48;
+
       return { x: fallbackX, y: fallbackY };
     }
     
@@ -562,23 +560,23 @@ export function SpacePosition() {
       {jogoIniciado && (
         <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
           {/* Canvas do Céu com Naves */}
-          <div className="relative min-h-[min(42vh,280px)] flex-1 lg:min-h-0">
+          <div className="relative min-h-[min(46vh,300px)] flex-1 lg:min-h-0">
             {/* EIXO CENTRAL - Nave Mãe + Laser */}
             <div className="absolute left-1/2 top-0 bottom-0 z-10 flex -translate-x-1/2 transform flex-col items-center">
               {/* Nave Mãe no topo */}
               <div className="relative mt-2 sm:mt-4">
-                <div className="animate-pulse text-5xl sm:text-6xl lg:text-7xl">
+                <div className="animate-pulse text-4xl sm:text-6xl lg:text-7xl">
                   🛸
                 </div>
                 <div className="absolute inset-0 opacity-50 blur-xl">
-                  <div className="text-5xl sm:text-6xl lg:text-7xl">
+                  <div className="text-4xl sm:text-6xl lg:text-7xl">
                     🛸
                   </div>
                 </div>
               </div>
               
               {/* Laser/Luz descendo - SUPER MELHORADO! */}
-              <div className="flex-1 relative w-20">
+              <div className="relative w-14 flex-1 sm:w-20">
                 {/* Camada 1 - Raio Central Brilhante */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-2 transform -translate-x-1/2 bg-gradient-to-b from-primary via-cyan-400 to-transparent animate-pulse"
                      style={{
@@ -647,12 +645,12 @@ export function SpacePosition() {
                 }}
               >
                 <div className="relative">
-                  <span className="text-5xl sm:text-6xl">
+                  <span className="text-3xl sm:text-5xl lg:text-6xl">
                     🛸
                   </span>
                   {/* Indicador de cor para TODAS as naves */}
                   <div 
-                    className="absolute -bottom-2 left-1/2 h-7 w-7 -translate-x-1/2 transform rounded-full border-4 border-white shadow-lg sm:h-8 sm:w-8"
+                    className="absolute -bottom-1 left-1/2 h-5 w-5 -translate-x-1/2 transform rounded-full border-[3px] border-white shadow-md sm:-bottom-2 sm:h-7 sm:w-7 sm:border-4 lg:h-8 lg:w-8"
                     style={{ backgroundColor: nave.cor }}
                   />
                 </div>
@@ -663,7 +661,7 @@ export function SpacePosition() {
             {naves.filter(n => n.destruida).map((nave) => (
               <div
                 key={`explosao-${nave.id}`}
-                className="absolute text-5xl animate-ping"
+                className="absolute text-3xl animate-ping sm:text-5xl"
                 style={{
                   left: `${nave.x}%`,
                   top: `${nave.y}%`,
@@ -676,24 +674,26 @@ export function SpacePosition() {
           </div>
 
           {/* Painel do Enzo (Dicas) */}
-          <div className="relative z-20 flex w-full flex-shrink-0 flex-col border-t border-white/10 bg-black/40 p-4 backdrop-blur-md sm:p-5 lg:w-80 lg:border-l lg:border-t-0 lg:p-6">
+          <div className="relative z-20 flex w-full flex-shrink-0 flex-col border-t border-white/10 bg-black/40 px-3 py-3 backdrop-blur-md sm:px-5 sm:py-5 lg:w-80 lg:border-l lg:border-t-0 lg:p-6">
             {/* Avatar do Enzo */}
-            <div className="mb-4 flex items-center gap-3 sm:mb-6">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-4 border-cyan-300/60 bg-gradient-to-br from-primary to-cyan-500 shadow-xl sm:h-16 sm:w-16">
-                <span className="text-2xl sm:text-3xl">🤖</span>
+            <div className="mb-3 flex items-center gap-2 sm:mb-6 sm:gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[3px] border-cyan-300/60 bg-gradient-to-br from-primary to-cyan-500 shadow-lg sm:h-16 sm:w-16 sm:border-4">
+                <span className="text-xl sm:text-3xl">🤖</span>
               </div>
               <div className="min-w-0">
-                <h3 className="text-base font-bold text-white sm:text-lg">Enzo</h3>
-                <p className="text-sm text-cyan-200">Seu copiloto</p>
+                <h3 className="text-sm font-bold text-white sm:text-lg">Enzo</h3>
+                <p className="text-xs text-cyan-200 sm:text-sm">Seu copiloto</p>
               </div>
             </div>
 
             {/* Dica Atual */}
             {estadoJogo === 'jogando' && naveAlvo && (
-              <div className="mb-3 rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/20 to-cyan-500/20 p-4 backdrop-blur-sm sm:mb-4 sm:p-5">
-                <p className="mb-2 text-xs font-bold text-cyan-200 sm:mb-3 sm:text-sm">📡 DICA ATUAL:</p>
-                <div className="mb-3 rounded-xl bg-black/30 p-3 sm:p-4">
-                  <p className="text-center text-base font-bold text-white sm:text-lg">
+              <div className="mb-3 rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/20 to-cyan-500/20 p-3 backdrop-blur-sm sm:mb-4 sm:rounded-2xl sm:p-5">
+                <p className="mb-1.5 text-[10px] font-bold tracking-wide text-cyan-200 sm:mb-3 sm:text-sm">
+                  📡 DICA ATUAL:
+                </p>
+                <div className="mb-2.5 rounded-lg bg-black/30 p-2.5 sm:mb-3 sm:rounded-xl sm:p-4">
+                  <p className="text-center text-xs font-bold leading-snug text-white sm:text-base lg:text-lg">
                     "A nave{' '}
                     <span 
                       className="font-black uppercase"
@@ -702,7 +702,7 @@ export function SpacePosition() {
                       {naveAlvo.nome}
                     </span>
                     {' '}está na{' '}
-                    <span className="text-cyan-200 uppercase font-black">
+                    <span className="font-black uppercase text-cyan-200">
                       {naveAlvo.posicao}
                     </span>
                     !"
@@ -710,52 +710,52 @@ export function SpacePosition() {
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div 
-                    className="w-10 h-10 rounded-full border-4 border-white shadow-lg"
+                    className="h-8 w-8 shrink-0 rounded-full border-2 border-white shadow-md sm:h-10 sm:w-10 sm:border-4"
                     style={{ backgroundColor: naveAlvo.cor }}
                   />
-                  <span className="text-white text-2xl">🛸</span>
+                  <span className="text-xl text-white sm:text-2xl">🛸</span>
                 </div>
               </div>
             )}
 
             {/* Progresso */}
-            <div className="bg-white/10 rounded-2xl p-4 mb-4">
-              <p className="text-white/70 text-sm mb-2">Progresso:</p>
-              <div className="flex gap-2">
+            <div className="mb-3 rounded-xl bg-white/10 p-3 sm:mb-4 sm:rounded-2xl sm:p-4">
+              <p className="mb-1.5 text-[11px] text-white/70 sm:mb-2 sm:text-sm">Progresso</p>
+              <div className="flex gap-1.5 sm:gap-2">
                 {[...Array(5)].map((_, i) => (
                   <div
                     key={i}
-                    className={`flex-1 h-2 rounded-full ${
+                    className={`h-1.5 flex-1 rounded-full sm:h-2 ${
                       i < navesAcertadas.length ? 'bg-green-500' : 'bg-white/20'
                     }`}
                   />
                 ))}
               </div>
-              <p className="text-white font-bold text-center mt-2">
-                {navesAcertadas.length} / 5 naves eliminadas
+              <p className="mt-1.5 text-center text-xs font-bold text-white sm:mt-2 sm:text-base">
+                {navesAcertadas.length} / 5 naves
               </p>
             </div>
 
             {/* Estado do Jogo */}
             {estadoJogo === 'vitoria' && (
-              <div className="bg-gradient-to-br from-primary/30 to-cyan-500/25 rounded-2xl p-5 border-2 border-primary/50 mb-4">
-                <p className="text-4xl text-center mb-3">🎉</p>
-                <p className="text-cyan-200 font-bold text-xl text-center mb-2">
+              <div className="mb-3 rounded-xl border-2 border-primary/50 bg-gradient-to-br from-primary/30 to-cyan-500/25 p-4 sm:mb-4 sm:rounded-2xl sm:p-5">
+                <p className="mb-2 text-center text-3xl sm:mb-3 sm:text-4xl">🎉</p>
+                <p className="mb-1 text-center text-base font-bold text-cyan-200 sm:mb-2 sm:text-xl">
                   MISSÃO CUMPRIDA!
                 </p>
-                <p className="text-white text-center text-sm">
+                <p className="text-center text-xs text-white sm:text-sm">
                   Você salvou a galáxia!
                 </p>
               </div>
             )}
 
             {estadoJogo === 'derrota' && (
-              <div className="bg-gradient-to-br from-orange-500/25 to-amber-500/25 rounded-2xl p-5 border-2 border-orange-300/70 mb-4">
-                <p className="text-4xl text-center mb-3">💔</p>
-                <p className="text-orange-200 font-bold text-xl text-center mb-2">
+              <div className="mb-3 rounded-xl border-2 border-orange-300/70 bg-gradient-to-br from-orange-500/25 to-amber-500/25 p-4 sm:mb-4 sm:rounded-2xl sm:p-5">
+                <p className="mb-2 text-center text-3xl sm:mb-3 sm:text-4xl">💔</p>
+                <p className="mb-1 text-center text-base font-bold text-orange-200 sm:mb-2 sm:text-xl">
                   MISSÃO FALHOU!
                 </p>
-                <p className="text-white text-center text-sm">
+                <p className="text-center text-xs text-white sm:text-sm">
                   Você acertou um holograma!
                 </p>
               </div>
