@@ -1,0 +1,835 @@
+import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router';
+import { ChevronLeft, AlertCircle, Eraser, Shapes } from 'lucide-react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+// ESCALA: 1cm = 20 pixels
+const ESCALA = 20;
+
+// Configurações dos diferentes tipos de triângulos (apenas para referência educativa)
+const TRIANGULOS = {
+  equilatero: {
+    nome: 'Equilátero',
+    descricao: '3 lados iguais',
+    emoji: '🔺',
+    retas: [
+      { tamanho: 10, cor: '#4fc3f7', nome: 'Reta 1' },
+      { tamanho: 10, cor: '#81d4a6', nome: 'Reta 2' },
+      { tamanho: 10, cor: '#ffb347', nome: 'Reta 3' },
+      { tamanho: 5, cor: '#f472b6', nome: 'Reta 4' },
+      { tamanho: 8, cor: '#a78bfa', nome: 'Reta 5' },
+      { tamanho: 15, cor: '#fb923c', nome: 'Reta 6' },
+    ],
+  },
+  isosceles: {
+    nome: 'Isósceles',
+    descricao: '2 lados iguais',
+    emoji: '🔻',
+    retas: [
+      { tamanho: 11, cor: '#81d4a6', nome: 'Reta 1' },
+      { tamanho: 11, cor: '#4fc3f7', nome: 'Reta 2' },
+      { tamanho: 12, cor: '#ffb347', nome: 'Reta 3' },
+      { tamanho: 4, cor: '#f472b6', nome: 'Reta 4' },
+      { tamanho: 6, cor: '#a78bfa', nome: 'Reta 5' },
+      { tamanho: 25, cor: '#fb923c', nome: 'Reta 6' },
+    ],
+  },
+  escaleno: {
+    nome: 'Escaleno',
+    descricao: '3 lados diferentes',
+    emoji: '📐',
+    retas: [
+      { tamanho: 14, cor: '#a78bfa', nome: 'Reta 1' },
+      { tamanho: 15, cor: '#ffb347', nome: 'Reta 2' },
+      { tamanho: 10, cor: '#81d4a6', nome: 'Reta 3' },
+      { tamanho: 3, cor: '#4fc3f7', nome: 'Reta 4' },
+      { tamanho: 5, cor: '#f472b6', nome: 'Reta 5' },
+      { tamanho: 30, cor: '#fb923c', nome: 'Reta 6' },
+    ],
+  },
+  retangulo: {
+    nome: 'Retângulo',
+    descricao: 'Com ângulo de 90°',
+    emoji: '📏',
+    retas: [
+      { tamanho: 12, cor: '#ffb347', nome: 'Reta 1' },
+      { tamanho: 9, cor: '#81d4a6', nome: 'Reta 2' },
+      { tamanho: 15, cor: '#4fc3f7', nome: 'Reta 3' },
+      { tamanho: 4, cor: '#f472b6', nome: 'Reta 4' },
+      { tamanho: 6, cor: '#a78bfa', nome: 'Reta 5' },
+      { tamanho: 22, cor: '#fb923c', nome: 'Reta 6' },
+    ],
+  },
+  livre: {
+    nome: 'Livre',
+    descricao: 'Experimente!',
+    emoji: '✨',
+    retas: [
+      { tamanho: 8, cor: '#4fc3f7', nome: 'Reta 1' },
+      { tamanho: 10, cor: '#81d4a6', nome: 'Reta 2' },
+      { tamanho: 12, cor: '#ffb347', nome: 'Reta 3' },
+      { tamanho: 15, cor: '#a78bfa', nome: 'Reta 4' },
+      { tamanho: 6, cor: '#f472b6', nome: 'Reta 5' },
+      { tamanho: 20, cor: '#fb923c', nome: 'Reta 6' },
+      { tamanho: 3, cor: '#ec4899', nome: 'Reta 7' },
+      { tamanho: 25, cor: '#8b5cf6', nome: 'Reta 8' },
+    ],
+  },
+};
+
+function calcularDistancia(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+function PecaArrastavel({ segmento, index }) {
+  const [{ estaArrastando }, refArrastar] = useDrag(() => ({
+    type: 'SEGMENTO',
+    item: { segmento, origem: 'caixa' },
+    collect: (monitor) => ({
+      estaArrastando: monitor.isDragging(),
+    }),
+  }), [segmento]);
+
+  const largura = (segmento.tamanho / 25) * 100;
+
+  return (
+    <div
+      ref={refArrastar}
+      className="bg-gray-50 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-move"
+      style={{
+        opacity: estaArrastando ? 0.5 : 1,
+      }}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-semibold text-foreground">
+          {segmento.nome}
+        </span>
+        <span className="text-xs text-muted-foreground font-bold">
+          {segmento.tamanho} cm
+        </span>
+      </div>
+      <div
+        className="h-2 rounded-full"
+        style={{
+          backgroundColor: segmento.cor,
+          width: Math.min(largura, 100) + '%',
+        }}
+      ></div>
+      <div className="mt-2 text-xs text-center text-muted-foreground">
+        ∞ ilimitado
+      </div>
+    </div>
+  );
+}
+
+function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRetas }) {
+  const [arrastando, setArrastando] = useState(null);
+  const [offsetInicial, setOffsetInicial] = useState({ x: 0, y: 0 });
+  const [hoverPonta, setHoverPonta] = useState(null);
+
+  // Encontrar todas as pontas de outras retas (exceto a atual)
+  function encontrarPontasProximas(x, y, raio = 50) {
+    const pontasProximas = [];
+    
+    todasAsRetas.forEach((reta, idx) => {
+      if (idx === indice) return; // Pular a própria reta
+      
+      // Verificar ponta 1
+      const dist1 = calcularDistancia(x, y, reta.x1, reta.y1);
+      if (dist1 < raio) {
+        pontasProximas.push({ x: reta.x1, y: reta.y1, distancia: dist1 });
+      }
+      
+      // Verificar ponta 2
+      const dist2 = calcularDistancia(x, y, reta.x2, reta.y2);
+      if (dist2 < raio) {
+        pontasProximas.push({ x: reta.x2, y: reta.y2, distancia: dist2 });
+      }
+    });
+    
+    // Retornar a ponta mais próxima
+    if (pontasProximas.length > 0) {
+      pontasProximas.sort((a, b) => a.distancia - b.distancia);
+      return pontasProximas[0];
+    }
+    
+    return null;
+  }
+
+  function iniciarArrasteCorpo(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const canvasRect = document.getElementById('canvas-svg')?.getBoundingClientRect();
+    if (!canvasRect) return;
+
+    const mouseX = e.clientX - canvasRect.left;
+    const mouseY = e.clientY - canvasRect.top;
+    
+    setOffsetInicial({
+      x: mouseX - segmento.x1,
+      y: mouseY - segmento.y1,
+    });
+    
+    setArrastando('corpo');
+  }
+
+  function iniciarArrastePonta(ponta, e) {
+    e.stopPropagation();
+    e.preventDefault();
+    setArrastando(ponta);
+  }
+
+  function mover(e) {
+    if (!arrastando) return;
+
+    const canvasRect = document.getElementById('canvas-svg')?.getBoundingClientRect();
+    if (!canvasRect) return;
+
+    let mouseX = e.clientX - canvasRect.left;
+    let mouseY = e.clientY - canvasRect.top;
+
+    if (arrastando === 'corpo') {
+      const novoX1 = mouseX - offsetInicial.x;
+      const novoY1 = mouseY - offsetInicial.y;
+      const deltaX = novoX1 - segmento.x1;
+      const deltaY = novoY1 - segmento.y1;
+      
+      aoAtualizar({
+        x1: segmento.x1 + deltaX,
+        y1: segmento.y1 + deltaY,
+        x2: segmento.x2 + deltaX,
+        y2: segmento.y2 + deltaY,
+      });
+    } else if (arrastando === 'ponta1') {
+      // Verificar se há pontas próximas para grudar
+      const pontaProxima = encontrarPontasProximas(mouseX, mouseY);
+      if (pontaProxima) {
+        mouseX = pontaProxima.x;
+        mouseY = pontaProxima.y;
+      }
+
+      const dx = mouseX - segmento.x2;
+      const dy = mouseY - segmento.y2;
+      const distancia = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distancia > 0) {
+        const tamanhoPixels = segmento.tamanho * ESCALA;
+        const fator = tamanhoPixels / distancia;
+        const novoX1 = segmento.x2 + dx * fator;
+        const novoY1 = segmento.y2 + dy * fator;
+        
+        aoAtualizar({
+          x1: novoX1,
+          y1: novoY1,
+        });
+      }
+    } else if (arrastando === 'ponta2') {
+      // Verificar se há pontas próximas para grudar
+      const pontaProxima = encontrarPontasProximas(mouseX, mouseY);
+      if (pontaProxima) {
+        mouseX = pontaProxima.x;
+        mouseY = pontaProxima.y;
+      }
+
+      const dx = mouseX - segmento.x1;
+      const dy = mouseY - segmento.y1;
+      const distancia = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distancia > 0) {
+        const tamanhoPixels = segmento.tamanho * ESCALA;
+        const fator = tamanhoPixels / distancia;
+        const novoX2 = segmento.x1 + dx * fator;
+        const novoY2 = segmento.y1 + dy * fator;
+        
+        aoAtualizar({
+          x2: novoX2,
+          y2: novoY2,
+        });
+      }
+    }
+  }
+
+  function parar() {
+    setArrastando(null);
+  }
+
+  const x1 = segmento.x1;
+  const y1 = segmento.y1;
+  const x2 = segmento.x2;
+  const y2 = segmento.y2;
+
+  // Verificar se as pontas estão grudadas em outras retas
+  const ponta1Grudada = encontrarPontasProximas(x1, y1, 5);
+  const ponta2Grudada = encontrarPontasProximas(x2, y2, 5);
+
+  // Calcular tamanho atual em cm
+  const tamanhoAtualPixels = calcularDistancia(x1, y1, x2, y2);
+  const tamanhoAtualCm = (tamanhoAtualPixels / ESCALA).toFixed(1);
+
+  // Área clicável maior para retas pequenas
+  const larguraClicavel = Math.max(60, tamanhoAtualPixels * 0.5);
+
+  return (
+    <g
+      onMouseMove={mover}
+      onMouseUp={parar}
+      onMouseLeave={parar}
+      style={{ userSelect: 'none' }}
+    >
+      {/* Linha INVISÍVEL GROSSA para facilitar o clique */}
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke="transparent"
+        strokeWidth={larguraClicavel}
+        strokeLinecap="round"
+        style={{ 
+          cursor: arrastando === 'corpo' ? 'grabbing' : 'move',
+          userSelect: 'none',
+        }}
+        onMouseDown={iniciarArrasteCorpo}
+      />
+      
+      {/* Linha visível colorida */}
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={segmento.cor}
+        strokeWidth="8"
+        strokeLinecap="round"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
+
+      {/* Label com tamanho em CM */}
+      <g transform={`translate(${(x1 + x2) / 2}, ${(y1 + y2) / 2 - 10})`}>
+        <rect
+          x="-25"
+          y="-15"
+          width="50"
+          height="20"
+          fill="white"
+          stroke={segmento.cor}
+          strokeWidth="2"
+          rx="6"
+          style={{ pointerEvents: 'none' }}
+        />
+        <text
+          x="0"
+          y="0"
+          textAnchor="middle"
+          fontSize="12"
+          fill={segmento.cor}
+          fontWeight="bold"
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          {tamanhoAtualCm}cm
+        </text>
+      </g>
+
+      {/* Círculo invisível GRANDE para facilitar o clique - Ponta 1 */}
+      <circle
+        cx={x1}
+        cy={y1}
+        r="12"
+        fill="transparent"
+        style={{ 
+          cursor: arrastando === 'ponta1' ? 'grabbing' : 'pointer',
+          userSelect: 'none',
+          pointerEvents: arrastando && arrastando !== 'ponta1' ? 'none' : 'auto',
+        }}
+        onMouseDown={(e) => iniciarArrastePonta('ponta1', e)}
+        onMouseEnter={() => setHoverPonta('ponta1')}
+        onMouseLeave={() => setHoverPonta(null)}
+      />
+
+      {/* Círculo visível colorido - Ponta 1 */}
+      <circle
+        cx={x1}
+        cy={y1}
+        r={hoverPonta === 'ponta1' || arrastando === 'ponta1' ? '12' : '9'}
+        fill={ponta1Grudada ? '#10b981' : segmento.cor}
+        stroke="white"
+        strokeWidth="3"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          transition: 'r 0.2s ease',
+        }}
+      />
+      
+      {/* Indicador de rotação - Ponta 1 */}
+      {(hoverPonta === 'ponta1' || arrastando === 'ponta1') && (
+        <circle
+          cx={x1}
+          cy={y1}
+          r="18"
+          fill="none"
+          stroke={segmento.cor}
+          strokeWidth="2"
+          strokeDasharray="3 3"
+          opacity="0.6"
+          style={{ pointerEvents: 'none' }}
+        />
+      )}
+
+      {/* Círculo invisível GRANDE para facilitar o clique - Ponta 2 */}
+      <circle
+        cx={x2}
+        cy={y2}
+        r="12"
+        fill="transparent"
+        style={{ 
+          cursor: arrastando === 'ponta2' ? 'grabbing' : 'pointer',
+          userSelect: 'none',
+          pointerEvents: arrastando && arrastando !== 'ponta2' ? 'none' : 'auto',
+        }}
+        onMouseDown={(e) => iniciarArrastePonta('ponta2', e)}
+        onMouseEnter={() => setHoverPonta('ponta2')}
+        onMouseLeave={() => setHoverPonta(null)}
+      />
+
+      {/* Círculo visível colorido - Ponta 2 */}
+      <circle
+        cx={x2}
+        cy={y2}
+        r={hoverPonta === 'ponta2' || arrastando === 'ponta2' ? '12' : '9'}
+        fill={ponta2Grudada ? '#10b981' : segmento.cor}
+        stroke="white"
+        strokeWidth="3"
+        style={{ 
+          pointerEvents: 'none',
+          userSelect: 'none',
+          transition: 'r 0.2s ease',
+        }}
+      />
+      
+      {/* Indicador de rotação - Ponta 2 */}
+      {(hoverPonta === 'ponta2' || arrastando === 'ponta2') && (
+        <circle
+          cx={x2}
+          cy={y2}
+          r="18"
+          fill="none"
+          stroke={segmento.cor}
+          strokeWidth="2"
+          strokeDasharray="3 3"
+          opacity="0.6"
+          style={{ pointerEvents: 'none' }}
+        />
+      )}
+
+      <g transform={`translate(${(x1 + x2) / 2 - 15}, ${(y1 + y2) / 2 + 25})`}>
+        <rect
+          width="30"
+          height="26"
+          fill="#ef4444"
+          stroke="white"
+          strokeWidth="2"
+          rx="8"
+          style={{ cursor: 'pointer', userSelect: 'none' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            aoRemover();
+          }}
+        />
+        <text
+          x="15"
+          y="18"
+          textAnchor="middle"
+          fontSize="18"
+          fill="white"
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+          fontWeight="bold"
+        >
+          ×
+        </text>
+      </g>
+    </g>
+  );
+}
+
+function CanvasInterativo({ segmentosNoCanvas, setSegmentosNoCanvas, tipoAtual }) {
+  const config = TRIANGULOS[tipoAtual];
+  const [retaAtiva, setRetaAtiva] = useState(null);
+  
+  const [{ estaAcimaDaArea }, refSoltar] = useDrop(() => ({
+    accept: 'SEGMENTO',
+    drop: (item, monitor) => {
+      const offsetCanvas = monitor.getClientOffset();
+      const canvasRect = document.getElementById('canvas-svg')?.getBoundingClientRect();
+      
+      if (offsetCanvas && canvasRect) {
+        const x = offsetCanvas.x - canvasRect.left;
+        const y = offsetCanvas.y - canvasRect.top;
+        
+        const comprimentoPixels = item.segmento.tamanho * ESCALA;
+        
+        setSegmentosNoCanvas([
+          ...segmentosNoCanvas,
+          {
+            ...item.segmento,
+            x1: x - comprimentoPixels / 2,
+            y1: y,
+            x2: x + comprimentoPixels / 2,
+            y2: y,
+            id: Date.now() + Math.random(),
+          },
+        ]);
+      }
+    },
+    collect: (monitor) => ({
+      estaAcimaDaArea: monitor.isOver(),
+    }),
+  }), [segmentosNoCanvas]);
+
+  function atualizarSegmento(indice, novasPropriedades) {
+    setSegmentosNoCanvas(segmentos => {
+      const novosSegmentos = [...segmentos];
+      novosSegmentos[indice] = { ...novosSegmentos[indice], ...novasPropriedades };
+      return novosSegmentos;
+    });
+  }
+
+  function removerSegmento(indice) {
+    setSegmentosNoCanvas(segmentos => segmentos.filter((_, i) => i !== indice));
+  }
+
+  function verificarTrianguloFechado() {
+    if (segmentosNoCanvas.length !== 3) return false;
+
+    // Verificar se as 3 retas formam um triângulo fechado
+    const tolerancia = 5;
+    let conexoes = 0;
+    
+    for (let i = 0; i < segmentosNoCanvas.length; i++) {
+      for (let j = i + 1; j < segmentosNoCanvas.length; j++) {
+        const reta1 = segmentosNoCanvas[i];
+        const reta2 = segmentosNoCanvas[j];
+        
+        // Verificar todas as combinações de pontas
+        if (calcularDistancia(reta1.x1, reta1.y1, reta2.x1, reta2.y1) < tolerancia) conexoes++;
+        if (calcularDistancia(reta1.x1, reta1.y1, reta2.x2, reta2.y2) < tolerancia) conexoes++;
+        if (calcularDistancia(reta1.x2, reta1.y2, reta2.x1, reta2.y1) < tolerancia) conexoes++;
+        if (calcularDistancia(reta1.x2, reta1.y2, reta2.x2, reta2.y2) < tolerancia) conexoes++;
+      }
+    }
+    
+    // Um triângulo fechado tem exatamente 3 conexões
+    return conexoes === 3;
+  }
+
+  const trianguloCompleto = verificarTrianguloFechado();
+
+  return (
+    <div
+      ref={refSoltar}
+      className="w-full h-full bg-white rounded-3xl shadow-inner relative select-none"
+      style={{
+        backgroundImage:
+          'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.03) 19px, rgba(0,0,0,0.03) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.03) 19px, rgba(0,0,0,0.03) 20px)',
+        backgroundColor: estaAcimaDaArea ? 'rgba(79, 195, 247, 0.05)' : 'white',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none',
+      }}
+    >
+      <svg id="canvas-svg" className="absolute inset-0 w-full h-full select-none" style={{ userSelect: 'none' }}>
+        {segmentosNoCanvas.map((seg, index) => (
+          <SegmentoNoCanvas
+            key={seg.id}
+            segmento={seg}
+            indice={index}
+            aoAtualizar={(props) => atualizarSegmento(index, props)}
+            aoRemover={() => removerSegmento(index)}
+            todasAsRetas={segmentosNoCanvas}
+          />
+        ))}
+      </svg>
+      
+      {segmentosNoCanvas.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <p className="text-4xl mb-3">{config.emoji}</p>
+            <p className="text-lg text-gray-400">Arraste as retas aqui</p>
+            <p className="text-sm text-gray-400 mt-2">Construa triângulos!</p>
+          </div>
+        </div>
+      )}
+
+      {trianguloCompleto && (
+        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-8 py-4 rounded-3xl shadow-2xl animate-bounce z-10">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🎉</span>
+            <div>
+              <p className="font-bold text-lg">Triângulo Fechado!</p>
+              <p className="text-sm">Você conectou as 3 retas!</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WorkspaceConteudo() {
+  const navegar = useNavigate();
+  const [tipoTriangulo, setTipoTriangulo] = useState('livre');
+  const [segmentosNoCanvas, setSegmentosNoCanvas] = useState([]);
+  
+  const configAtual = TRIANGULOS[tipoTriangulo];
+
+  function limparTela() {
+    setSegmentosNoCanvas([]);
+  }
+
+  function voltarDashboard() {
+    navegar('/dashboard');
+  }
+
+  function trocarTipo(novoTipo) {
+    setTipoTriangulo(novoTipo);
+    setSegmentosNoCanvas([]);
+  }
+
+  function analisarTriangulo() {
+    if (segmentosNoCanvas.length !== 3) return null;
+
+    // Calcular os tamanhos das 3 retas em cm
+    const lados = segmentosNoCanvas.map(seg => {
+      const distPixels = calcularDistancia(seg.x1, seg.y1, seg.x2, seg.y2);
+      return Math.round(distPixels / ESCALA);
+    });
+
+    const [a, b, c] = lados;
+
+    // Regra de existência do triângulo
+    const regra1 = (a + b) > c;
+    const regra2 = (a + c) > b;
+    const regra3 = (b + c) > a;
+    
+    const trianguloValido = regra1 && regra2 && regra3;
+
+    // Classificar o tipo de triângulo
+    let tipo = '';
+    if (lados[0] === lados[1] && lados[1] === lados[2]) {
+      tipo = 'Equilátero';
+    } else if (lados[0] === lados[1] || lados[1] === lados[2] || lados[0] === lados[2]) {
+      tipo = 'Isósceles';
+    } else {
+      tipo = 'Escaleno';
+    }
+
+    return {
+      valido: trianguloValido,
+      lados,
+      tipo,
+      regras: [
+        { expressao: `${a} + ${b} > ${c}`, resultado: `${a + b} > ${c}`, valida: regra1 },
+        { expressao: `${a} + ${c} > ${b}`, resultado: `${a + c} > ${b}`, valida: regra2 },
+        { expressao: `${b} + ${c} > ${a}`, resultado: `${b + c} > ${a}`, valida: regra3 },
+      ],
+    };
+  }
+
+  const analise = analisarTriangulo();
+
+  return (
+    <div className="h-screen flex flex-col bg-background">
+      <div className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
+        <button
+          onClick={voltarDashboard}
+          className="w-10 h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6 text-foreground" />
+        </button>
+        <Shapes className="w-6 h-6 text-primary" />
+        <h2 className="text-2xl font-bold text-foreground">
+          Laboratório de Triângulos
+        </h2>
+      </div>
+
+      {/* Seletor de Tipo de Desafio */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3 overflow-x-auto">
+        <div className="flex gap-2">
+          {Object.entries(TRIANGULOS).map(([tipo, config]) => (
+            <button
+              key={tipo}
+              onClick={() => trocarTipo(tipo)}
+              className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all whitespace-nowrap ${
+                tipoTriangulo === tipo
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 text-foreground hover:bg-gray-200'
+              }`}
+            >
+              <span className="mr-2">{config.emoji}</span>
+              {config.nome}
+              <span className="ml-2 text-xs opacity-75">({config.descricao})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 flex overflow-hidden">
+        <aside className="w-64 bg-white p-6 shadow-md overflow-y-auto">
+          <h3 className="text-lg font-bold text-foreground mb-2">
+            Caixa de Retas
+          </h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            {configAtual.descricao}
+          </p>
+          
+          <div className="space-y-4">
+            {configAtual.retas.map((seg, index) => (
+              <PecaArrastavel key={index} segmento={seg} index={index} />
+            ))}
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-2xl border-2 border-blue-200">
+            <p className="text-sm text-foreground mb-2">
+              💡 <strong>Como usar:</strong>
+            </p>
+            <ul className="text-xs text-foreground/80 space-y-1">
+              <li>chandle️ Clique na <strong>linha</strong> = mover</li>
+              <li>⚫ Clique nas <strong>bolinhas</strong> = rotacionar</li>
+              <li>💚 <strong>Verde</strong> = conectado!</li>
+            </ul>
+          </div>
+        </aside>
+
+        <main className="flex-1 p-8 overflow-auto">
+          <CanvasInterativo
+            segmentosNoCanvas={segmentosNoCanvas}
+            setSegmentosNoCanvas={setSegmentosNoCanvas}
+            tipoAtual={tipoTriangulo}
+          />
+        </main>
+
+        <aside className="w-80 bg-[#ffedd5] p-6 shadow-md overflow-y-auto">
+          <div className="flex items-start gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#ffb347] rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
+              {configAtual.emoji}
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground mb-1">
+                Desafio: {configAtual.nome}
+              </h3>
+              <p className="text-sm text-foreground/80">
+                {configAtual.descricao}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white/70 rounded-2xl p-4 mb-4">
+            <p className="text-sm text-foreground leading-relaxed mb-3">
+              <strong>📚 Sobre triângulos:</strong>
+            </p>
+            <ul className="text-sm text-foreground/80 space-y-2">
+              <li>🔺 <strong>Equilátero:</strong> 3 lados iguais</li>
+              <li>🔻 <strong>Isósceles:</strong> 2 lados iguais</li>
+              <li>📐 <strong>Escaleno:</strong> 3 lados diferentes</li>
+              <li>📏 <strong>Retângulo:</strong> tem ângulo de 90°</li>
+            </ul>
+          </div>
+
+          <div className="bg-white/70 rounded-2xl p-4 mb-4">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-semibold">Retas conectadas:</span>
+              <span className="text-lg font-bold text-primary">{segmentosNoCanvas.length}</span>
+            </div>
+            
+            {analise && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-xs font-semibold text-foreground mb-2">
+                  📊 Análise do Triângulo:
+                </p>
+                
+                <div className="mb-3">
+                  <p className="text-xs text-foreground/70 mb-1">
+                    <strong>Tipo:</strong> {analise.tipo}
+                  </p>
+                  <p className="text-xs text-foreground/70">
+                    <strong>Lados:</strong> {analise.lados.join(' cm, ')} cm
+                  </p>
+                </div>
+
+                <p className="text-xs font-semibold text-foreground mb-2">
+                  📐 Regra de Existência:
+                </p>
+                <p className="text-xs text-foreground/70 mb-2 italic">
+                  A base deve ser menor do que a soma dos dois outros lados.
+                </p>
+                <div className="space-y-1">
+                  {analise.regras.map((regra, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="text-foreground font-mono">{regra.expressao} cm</span>
+                      <span className={regra.valida ? 'text-green-600' : 'text-red-600'}>
+                        {regra.valida ? '✓' : '✗'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                {!analise.valido && (
+                  <div className="mt-3 p-2 bg-red-100 border border-red-300 rounded-xl">
+                    <p className="text-xs text-red-700 font-semibold">
+                      ❌ Triângulo impossível!
+                    </p>
+                    <p className="text-xs text-red-600 mt-1">
+                      As retas não formam um triângulo válido. Experimente outras combinações!
+                    </p>
+                  </div>
+                )}
+                
+                {analise.valido && (
+                  <div className="mt-3 p-2 bg-green-100 border border-green-300 rounded-xl">
+                    <p className="text-xs text-green-700 font-semibold">
+                      ✓ Triângulo {analise.tipo} válido!
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      Parabéns! Você criou um triângulo que existe! 🎉
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {segmentosNoCanvas.length < 3 && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <p className="text-xs text-blue-700">
+                  💡 Arraste 3 retas e conecte as pontas para formar um triângulo!
+                </p>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={limparTela}
+            disabled={segmentosNoCanvas.length === 0}
+            className="w-full bg-red-500 text-white py-4 rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Eraser className="w-5 h-5" />
+            Limpar Tela
+          </button>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+export function Workspace() {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <WorkspaceConteudo />
+    </DndProvider>
+  );
+}

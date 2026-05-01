@@ -1,0 +1,85 @@
+@startuml Diagrama de Caso de Uso - GeoMaker
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Estudante" as user
+
+rectangle GeoMaker {
+  usecase "Acessar Landing Page" as UC1
+  usecase "Navegar para Dashboard" as UC2
+  usecase "Visualizar Atividades\nDisponíveis" as UC3
+
+  package "Laboratório de Triângulos" {
+    usecase "Jogar Laboratório\nde Triângulos" as UC4
+    usecase "Selecionar Tipo\nde Triângulo" as UC4_1
+    usecase "Arrastar Retas\npara Canvas" as UC4_2
+    usecase "Rotacionar e\nMover Retas" as UC4_3
+    usecase "Conectar Pontas\ndas Retas" as UC4_4
+    usecase "Analisar Triângulo\nFormado" as UC4_5
+    usecase "Limpar Tela" as UC4_6
+  }
+
+  package "Invasão Espacial" {
+    usecase "Jogar Invasão\nEspacial" as UC5
+    usecase "Ler Convocamento\nda Missão" as UC5_1
+    usecase "Identificar Naves por\nCor e Posição" as UC5_2
+    usecase "Atirar nas Naves\nAlienígenas" as UC5_3
+    usecase "Seguir Dicas do\nCopiloto Enzo" as UC5_4
+    usecase "Ver Resultado\n(Vitória/Derrota)" as UC5_5
+    usecase "Reiniciar Jogo" as UC5_6
+  }
+
+  package "Aventura das Frações" {
+    usecase "Jogar Aventura\ndas Frações" as UC7
+    usecase "Ajustar Numerador" as UC7_1
+    usecase "Ajustar Denominador" as UC7_2
+    usecase "Visualizar Pizza\nDividida" as UC7_3
+    usecase "Confirmar Resposta" as UC7_4
+    usecase "Ver Feedback\n(Correto/Incorreto)" as UC7_5
+    usecase "Avançar para\nPróxima Pergunta" as UC7_6
+  }
+
+  usecase "Voltar ao Dashboard" as UC6
+}
+
+' Relacionamentos do usuário
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+user --> UC7
+
+' Relacionamentos de navegação
+UC1 ..> UC2 : <<extend>>
+UC2 --> UC3 : <<include>>
+
+' Relacionamentos do Laboratório de Triângulos
+UC4 ..> UC4_1 : <<include>>
+UC4 ..> UC4_2 : <<include>>
+UC4 ..> UC4_3 : <<include>>
+UC4 ..> UC4_4 : <<include>>
+UC4 ..> UC4_5 : <<include>>
+UC4 ..> UC4_6 : <<include>>
+UC4 ..> UC6 : <<extend>>
+
+' Relacionamentos da Invasão Espacial
+UC5 ..> UC5_1 : <<include>>
+UC5 ..> UC5_2 : <<include>>
+UC5 ..> UC5_3 : <<include>>
+UC5 ..> UC5_4 : <<include>>
+UC5 ..> UC5_5 : <<include>>
+UC5 ..> UC5_6 : <<include>>
+UC5 ..> UC6 : <<extend>>
+
+' Relacionamentos da Aventura das Frações
+UC7 ..> UC7_1 : <<include>>
+UC7 ..> UC7_2 : <<include>>
+UC7 ..> UC7_3 : <<include>>
+UC7 ..> UC7_4 : <<include>>
+UC7 ..> UC7_5 : <<include>>
+UC7 ..> UC7_6 : <<include>>
+UC7 ..> UC6 : <<extend>>
+
+@enduml

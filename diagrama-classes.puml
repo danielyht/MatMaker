@@ -1,0 +1,266 @@
+@startuml Diagrama de Classes - GeoMaker
+
+skinparam classAttributeIconSize 0
+
+class App {
+  + render(): JSX.Element
+}
+
+class Router {
+  - routes: Route[]
+  + navigate(path: string): void
+}
+
+class LandingPage {
+  - navegar: NavigateFunction
+  + render(): JSX.Element
+}
+
+class Dashboard {
+  - navegar: NavigateFunction
+  - atividades: Atividade[]
+  + render(): JSX.Element
+  + clicarAtividade(atividade: Atividade): void
+}
+
+class Atividade {
+  + id: number
+  + nome: string
+  + descricao: string
+  + icone: IconType
+  + cor: string
+  + bloqueado: boolean
+  + rota: string | null
+}
+
+class Workspace {
+  - tipoTriangulo: string
+  - segmentosNoCanvas: Segmento[]
+  - navegar: NavigateFunction
+  + limparTela(): void
+  + voltarDashboard(): void
+  + trocarTipo(novoTipo: string): void
+  + analisarTriangulo(): AnaliseTriangulo | null
+}
+
+class Segmento {
+  + id: string
+  + tamanho: number
+  + cor: string
+  + nome: string
+  + x1: number
+  + y1: number
+  + x2: number
+  + y2: number
+}
+
+class SegmentoNoCanvas {
+  - segmento: Segmento
+  - indice: number
+  - arrastando: string | null
+  - hoverPonta: string | null
+  - offsetInicial: {x: number, y: number}
+  - todasAsRetas: Segmento[]
+  + iniciarArrasteCorpo(e: Event): void
+  + iniciarArrastePonta(ponta: string, e: Event): void
+  + mover(e: Event): void
+  + parar(): void
+  + encontrarPontasProximas(x: number, y: number): object | null
+}
+
+class CanvasInterativo {
+  - segmentosNoCanvas: Segmento[]
+  - tipoAtual: string
+  - retaAtiva: string | null
+  + atualizarSegmento(indice: number, props: object): void
+  + removerSegmento(indice: number): void
+  + verificarTrianguloFechado(): boolean
+}
+
+class SpacePosition {
+  - mostrarConvocamento: boolean
+  - jogoIniciado: boolean
+  - naves: Nave[]
+  - navesReaisOrdenadas: Nave[]
+  - dicaAtual: number
+  - balasRestantes: number
+  - navesAcertadas: string[]
+  - navesErradas: string[]
+  - estadoJogo: EstadoJogo
+  + gerarNaves(): void
+  + clicarNave(nave: Nave): void
+  + reiniciarJogo(): void
+  + iniciarJogo(): void
+  + voltarDashboard(): void
+}
+
+class Nave {
+  + id: string
+  + tipo: TipoNave
+  + cor: string
+  + nome: string
+  + posicao: Posicao
+  + x: number
+  + y: number
+  + destruida: boolean
+}
+
+enum TipoNave {
+  real
+  falsa
+}
+
+enum Posicao {
+  esquerda
+  direita
+}
+
+enum EstadoJogo {
+  jogando
+  vitoria
+  derrota
+}
+
+class AnaliseTriangulo {
+  + valido: boolean
+  + lados: number[]
+  + tipo: string
+  + regras: RegraValidacao[]
+}
+
+class RegraValidacao {
+  + expressao: string
+  + resultado: string
+  + valida: boolean
+}
+
+class ModalConvocamento {
+  - aoFechar: Function
+  - aoIniciar: Function
+  + render(): JSX.Element
+}
+
+class ModalVitoria {
+  - aoProximaFase: Function
+  - aoRepetir: Function
+  + render(): JSX.Element
+}
+
+class ModalDerrota {
+  - aoRepetir: Function
+  - aoVoltar: Function
+  - acertos: number
+  - erros: number
+  + render(): JSX.Element
+}
+
+class PecaArrastavel {
+  - segmento: Segmento
+  - index: number
+  - estaArrastando: boolean
+  + render(): JSX.Element
+}
+
+class FractionsGame {
+  - perguntaAtualIndex: number
+  - numerador: number
+  - denominador: number
+  - estado: EstadoResposta
+  - pontuacao: number
+  - navegar: NavigateFunction
+  + verificarResposta(): void
+  + proximaPergunta(): void
+  + tentarNovamente(): void
+  + voltarDashboard(): void
+}
+
+class Pergunta {
+  + id: number
+  + texto: string
+  + numeradorCorreto: number
+  + denominadorCorreto: number
+}
+
+class BoloComFatias {
+  - numerador: number
+  - denominador: number
+  + render(): JSX.Element
+}
+
+class ControladorNumero {
+  - valor: number
+  - label: string
+  - min: number
+  - max: number
+  - cor: string
+  + incrementar(): void
+  + decrementar(): void
+  + aoMudar(novoValor: number): void
+}
+
+enum EstadoResposta {
+  respondendo
+  correto
+  incorreto
+}
+
+' Relacionamentos principais
+App --> Router : usa
+Router *-- LandingPage : gerencia
+Router *-- Dashboard : gerencia
+Router *-- Workspace : gerencia
+Router *-- SpacePosition : gerencia
+Router *-- FractionsGame : gerencia
+
+Dashboard o-- Atividade : contém
+Workspace o-- Segmento : gerencia
+Workspace ..> SegmentoNoCanvas : usa
+Workspace ..> CanvasInterativo : usa
+Workspace ..> PecaArrastavel : usa
+Workspace ..> AnaliseTriangulo : cria
+
+SegmentoNoCanvas --> Segmento : usa
+CanvasInterativo --> Segmento : gerencia
+CanvasInterativo --> SegmentoNoCanvas : renderiza
+PecaArrastavel --> Segmento : exibe
+
+SpacePosition *-- Nave : contém
+SpacePosition ..> ModalConvocamento : usa
+SpacePosition ..> ModalVitoria : usa
+SpacePosition ..> ModalDerrota : usa
+
+Nave --> TipoNave : tipo
+Nave --> Posicao : posição
+SpacePosition --> EstadoJogo : estado
+
+AnaliseTriangulo *-- RegraValidacao : contém
+
+FractionsGame *-- Pergunta : contém
+FractionsGame ..> BoloComFatias : usa
+FractionsGame ..> ControladorNumero : usa
+FractionsGame --> EstadoResposta : estado
+
+note right of App
+  Componente raiz da aplicação
+  que configura o roteamento
+end note
+
+note right of Workspace
+  Atividade principal para
+  construção de triângulos
+  com drag-and-drop
+end note
+
+note right of SpacePosition
+  Jogo educacional sobre
+  posicionamento espacial
+  (esquerda/direita)
+end note
+
+note right of FractionsGame
+  Jogo educacional sobre
+  frações com visualização
+  interativa de pizza
+end note
+
+@enduml

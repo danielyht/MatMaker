@@ -1,0 +1,13 @@
+# Line endings: LF everywhere (avoids CRLF noise on Windows + matches Vite/Node defaults)
+* text=auto eol=lf
+
+# Binary assets — do not convert
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
