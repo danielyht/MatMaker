@@ -3,6 +3,7 @@ import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { SpacePosition } from './components/SpacePosition';
 import { FractionsGame } from './components/FractionsGame';
+import { DoubleGame } from './components/DoubleGame';
 
 export const roteador = createBrowserRouter([
   {
@@ -20,5 +21,9 @@ export const roteador = createBrowserRouter([
   {
     path: '/fractions',
     Component: FractionsGame,
+  },
+  {
+    path: '/dobro',
+    Component: DoubleGame,
   },
 ]);

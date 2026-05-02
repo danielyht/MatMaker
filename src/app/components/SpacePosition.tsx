@@ -4,22 +4,22 @@ import { ChevronLeft, Rocket, Target, Zap, Heart, Crosshair } from 'lucide-react
 
 function ModalConvocamento({ aoFechar, aoIniciar }) {
   return (
-    <div className="fixed inset-0 bg-slate-950/70 flex items-center justify-center z-50 backdrop-blur-sm p-3 sm:p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl max-w-3xl w-full border-4 border-primary/50 overflow-hidden max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm sm:p-5">
+      <div className="mx-auto flex max-h-[92vh] w-[90%] max-w-sm flex-col overflow-hidden rounded-2xl border-2 border-primary/50 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl sm:w-full sm:max-w-md md:max-w-2xl md:rounded-3xl md:border-4 lg:max-w-3xl">
         {/* Header com estrelas */}
-        <div className="bg-primary/80 px-6 py-3 relative overflow-hidden">
+        <div className="relative overflow-hidden bg-primary/80 px-4 py-2.5 sm:px-6 sm:py-3">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-2 left-10 text-2xl">⭐</div>
             <div className="absolute top-1 right-20 text-xl">✨</div>
             <div className="absolute bottom-2 left-1/3 text-lg">🌟</div>
           </div>
-          <h2 className="text-2xl font-bold text-white text-center relative z-10">
+          <h2 className="relative z-10 text-center text-lg font-bold text-white sm:text-2xl">
             🚀 CONVOCAMENTO URGENTE 🚀
           </h2>
         </div>
 
         {/* Conteúdo */}
-        <div className="p-4 sm:p-6 text-white overflow-y-auto">
+        <div className="overflow-y-auto p-3 text-white sm:p-6">
           {/* Avatar do companheiro */}
           <div className="flex justify-center mb-3">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-cyan-500 rounded-full flex items-center justify-center shadow-xl border-4 border-cyan-300/60">
@@ -46,17 +46,6 @@ function ModalConvocamento({ aoFechar, aoIniciar }) {
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 font-bold">✓</span>
                   <span>Você tem <span className="font-bold text-yellow-300">5 balas</span> em sua nave</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <span>Existem <span className="font-bold text-red-400">5 naves reais</span> e <span className="font-bold text-purple-400">7 hologramas falsos</span></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <span>
-                    As <span className="font-bold text-cyan-200">mesmas cores</span> aparecem dos dois lados — use a{' '}
-                    <span className="font-bold text-cyan-300">posição</span> da dica (esquerda/direita), não só a cor
-                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-red-400 font-bold">✗</span>
@@ -99,22 +88,22 @@ function ModalConvocamento({ aoFechar, aoIniciar }) {
 
 function ModalVitoria({ aoProximaFase, aoRepetir }) {
   return (
-    <div className="fixed inset-0 bg-slate-950/80 flex items-center justify-center z-50 backdrop-blur-md p-3 sm:p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full border-2 sm:border-4 border-primary/50 overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
-        <div className="bg-gradient-to-r from-primary to-cyan-500 px-4 py-2.5 relative overflow-hidden shrink-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md sm:p-5">
+      <div className="animate-scale-in mx-auto flex max-h-[90vh] w-[90%] max-w-sm flex-col overflow-hidden rounded-2xl border-2 border-primary/50 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl sm:w-full sm:max-w-md md:max-w-lg md:rounded-3xl md:border-4">
+        <div className="relative shrink-0 overflow-hidden bg-gradient-to-r from-primary to-cyan-500 px-3 py-2 sm:px-4 sm:py-2.5">
           <h2 className="text-lg sm:text-xl font-bold text-white text-center relative z-10">
             🏆 Missão cumprida!
           </h2>
         </div>
 
-        <div className="p-4 sm:p-5 text-white overflow-y-auto">
-          <div className="flex justify-center mb-2">
-            <span className="text-4xl sm:text-5xl animate-bounce">🎉</span>
+        <div className="overflow-y-auto p-3 text-white sm:p-5">
+          <div className="mb-2 flex justify-center">
+            <span className="animate-bounce text-4xl sm:text-5xl">🎉</span>
           </div>
 
-          <div className="space-y-2.5 mb-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <p className="text-base font-bold text-cyan-200 text-center mb-1">
+          <div className="mb-4 space-y-2.5">
+            <div className="rounded-xl border border-white/20 bg-white/10 p-2.5 backdrop-blur-sm sm:p-3">
+              <p className="mb-1 text-center text-sm font-bold text-cyan-200 sm:text-base">
                 Parabéns, piloto!
               </p>
               <p className="text-sm leading-snug text-center text-white/90">
@@ -179,22 +168,22 @@ function ModalDerrota({ aoRepetir, aoVoltar, acertos, erros }) {
   const precisao = totalTiros > 0 ? Math.round((acertos / totalTiros) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 flex items-center justify-center z-50 backdrop-blur-md p-3 sm:p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full border-2 sm:border-4 border-orange-400/50 overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2.5 shrink-0">
-          <h2 className="text-lg sm:text-xl font-bold text-white text-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md sm:p-5">
+      <div className="animate-scale-in mx-auto flex max-h-[90vh] w-[90%] max-w-sm flex-col overflow-hidden rounded-2xl border-2 border-orange-400/50 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl sm:w-full sm:max-w-md md:max-w-lg md:rounded-3xl md:border-4">
+        <div className="shrink-0 bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-2 sm:px-4 sm:py-2.5">
+          <h2 className="text-center text-lg font-bold text-white sm:text-xl">
             Missão incompleta
           </h2>
         </div>
 
-        <div className="p-4 sm:p-5 text-white overflow-y-auto">
-          <div className="flex justify-center mb-2">
-            <span className="text-4xl sm:text-5xl animate-pulse">💔</span>
+        <div className="overflow-y-auto p-3 text-white sm:p-5">
+          <div className="mb-2 flex justify-center">
+            <span className="animate-pulse text-4xl sm:text-5xl">💔</span>
           </div>
 
-          <div className="space-y-2.5 mb-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <p className="text-base font-bold text-orange-200 text-center mb-1">
+          <div className="mb-4 space-y-2.5">
+            <div className="rounded-xl border border-white/20 bg-white/10 p-2.5 backdrop-blur-sm sm:p-3">
+              <p className="mb-1 text-center text-sm font-bold text-orange-200 sm:text-base">
                 Quase lá!
               </p>
               <p className="text-sm leading-snug text-center text-white/90">

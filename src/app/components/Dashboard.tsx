@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { Square, Lock, Rocket, Cookie } from 'lucide-react';
+import { Square, Lock, Rocket, Cookie, Apple } from 'lucide-react';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -25,6 +25,15 @@ export function Dashboard() {
     },
     {
       id: 3,
+      nome: 'Multiplicação no mercado',
+      descricao: 'Marque maçãs e resolva problemas de multiplicação no mercado',
+      icone: Apple,
+      cor: '#22c55e',
+      bloqueado: false,
+      rota: '/dobro',
+    },
+    {
+      id: 4,
       nome: 'Polígonos Especiais',
       descricao: 'Crie formas com muitos lados diferentes',
       icone: Square,
