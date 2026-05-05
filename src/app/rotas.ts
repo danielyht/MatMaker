@@ -5,6 +5,8 @@ import { SpacePosition } from './components/SpacePosition';
 import { FractionsGame } from './components/FractionsGame';
 import { DoubleGame } from './components/DoubleGame';
 import { SquarePowerGame } from './components/SquarePowerGame';
+import { PercentGame } from './components/PercentGame';
+import { MarketChallengeGame } from './components/MarketChallengeGame';
 
 export const roteador = createBrowserRouter([
   {
@@ -30,5 +32,13 @@ export const roteador = createBrowserRouter([
   {
     path: '/potencias-quadrado',
     Component: SquarePowerGame,
+  },
+  {
+    path: '/percentagens',
+    Component: PercentGame,
+  },
+  {
+    path: '/desafio-mercado',
+    Component: MarketChallengeGame,
   },
 ]);

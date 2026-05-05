@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { Square, Lock, Rocket, Cookie, Apple, Zap } from 'lucide-react';
+import { Rocket, Cookie, Apple, Zap, Percent, ShoppingBag } from 'lucide-react';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -34,21 +34,30 @@ export function Dashboard() {
     },
     {
       id: 4,
-      nome: 'Polígonos Especiais',
-      descricao: 'Crie formas com muitos lados diferentes',
-      icone: Square,
-      cor: '#c77dff',
-      bloqueado: true,
-      rota: null,
-    },
-    {
-      id: 5,
       nome: 'Potências ao quadrado',
       descricao: 'Quadrados pintados e potências ao quadrado.',
       icone: Zap,
       cor: '#7c3aed',
       bloqueado: false,
       rota: '/potencias-quadrado',
+    },
+    {
+      id: 5,
+      nome: 'Porcentagens',
+      descricao: 'Grade de 100 partes e percentagens.',
+      icone: Percent,
+      cor: '#0d9488',
+      bloqueado: false,
+      rota: '/percentagens',
+    },
+    {
+      id: 6,
+      nome: 'Desafio do mercado',
+      descricao: '12 perguntas mistas, com centavos.',
+      icone: ShoppingBag,
+      cor: '#059669',
+      bloqueado: false,
+      rota: '/desafio-mercado',
     },
   ];
 
@@ -73,7 +82,7 @@ export function Dashboard() {
         {atividades.map((atividade) => {
           const Icone = atividade.icone;
           const podeClicar = !atividade.bloqueado;
-          
+
           return (
             <div
               key={atividade.id}
@@ -82,7 +91,7 @@ export function Dashboard() {
               style={{
                 cursor: podeClicar ? 'pointer' : 'not-allowed',
                 opacity: podeClicar ? 1 : 0.6,
-                transform: podeClicar ? 'scale(1)' : 'scale(1)'
+                transform: podeClicar ? 'scale(1)' : 'scale(1)',
               }}
               onMouseEnter={(e) => {
                 if (podeClicar && window.matchMedia('(hover: hover)').matches) {
@@ -99,12 +108,6 @@ export function Dashboard() {
               >
                 <Icone className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
-
-              {atividade.bloqueado && (
-                <div className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-300 sm:top-6 sm:right-6 sm:h-10 sm:w-10">
-                  <Lock className="w-5 h-5 text-gray-600" />
-                </div>
-              )}
 
               <div className="md:flex md:items-center md:justify-between md:gap-4 md:flex-1">
                 <div className="pr-10 md:pr-0">

@@ -41,7 +41,7 @@ export function LandingPage() {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4 sm:gap-16 sm:px-6 sm:pb-16 sm:pt-8 md:px-8">
-        <section className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
+        <section className="max-w-2xl">
           <div className="space-y-5 sm:space-y-6">
             <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:px-4 sm:text-sm">
               Plataforma educativa interativa
@@ -66,32 +66,6 @@ export function LandingPage() {
               >
                 Ir para frações
               </button>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-border/80 bg-card p-5 shadow-xl sm:rounded-[2rem] sm:p-8">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:mb-6 sm:text-sm">
-              Trilha de hoje
-            </p>
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-primary/10 p-4">
-                <h3 className="text-base font-bold">Desafios numéricos</h3>
-                <p className="text-sm text-muted-foreground">
-                  Resolva problemas com lógica, contagem e interpretação.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-[var(--color-success)]/15 p-4">
-                <h3 className="text-base font-bold">Frações visuais</h3>
-                <p className="text-sm text-muted-foreground">
-                  Monte equivalências com blocos e comparações intuitivas.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-[var(--color-warning)]/15 p-4">
-                <h3 className="text-base font-bold">Desafio semanal</h3>
-                <p className="text-sm text-muted-foreground">
-                  Complete a missão bônus para ganhar medalhas no ranking.
-                </p>
-              </div>
             </div>
           </div>
         </section>
