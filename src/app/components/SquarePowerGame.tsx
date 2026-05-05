@@ -298,19 +298,9 @@ function GradeQuadradoPintado({
   matiz: number;
 }) {
   const tonal = CORES_MATIZ[Math.max(0, Math.min(CORES_MATIZ.length - 1, matiz))];
-  const celula =
-    outer >= 13
-      ? 'h-5 w-full min-h-5 sm:min-h-6'
-      : outer >= 11
-        ? 'h-5 w-full min-h-[1.125rem] sm:h-6'
-        : outer <= 7
-          ? 'h-8 w-full min-h-[1.75rem] sm:h-9'
-          : outer <= 8
-            ? 'h-7 w-full min-h-7 sm:h-8'
-            : 'h-6 w-full min-h-6 sm:h-7';
   return (
     <div
-      className="mx-auto grid w-full gap-px rounded-xl border border-slate-300 bg-slate-300 p-px shadow-inner sm:max-w-md"
+      className="mx-auto grid w-full max-w-md items-start gap-px rounded-xl border border-slate-300 bg-slate-300 p-px shadow-inner"
       style={{ gridTemplateColumns: `repeat(${outer}, minmax(0, 1fr))` }}
       role="img"
       aria-label={`Grade ${outer} por ${outer} com um bloco pintado`}
@@ -322,7 +312,7 @@ function GradeQuadradoPintado({
         return (
           <div
             key={idx}
-            className={`${celula} rounded-[2px] sm:rounded-[3px] ${dentro ? tonal : 'bg-white dark:bg-card'}`}
+            className={`aspect-square min-w-0 w-full rounded-[2px] sm:rounded-[3px] ${dentro ? tonal : 'bg-white dark:bg-card'}`}
           />
         );
       })}
