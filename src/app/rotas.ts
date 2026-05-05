@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { SpacePosition } from './components/SpacePosition';
 import { FractionsGame } from './components/FractionsGame';
 import { DoubleGame } from './components/DoubleGame';
+import { SquarePowerGame } from './components/SquarePowerGame';
 
 export const roteador = createBrowserRouter([
   {
@@ -25,5 +26,9 @@ export const roteador = createBrowserRouter([
   {
     path: '/dobro',
     Component: DoubleGame,
+  },
+  {
+    path: '/potencias-quadrado',
+    Component: SquarePowerGame,
   },
 ]);

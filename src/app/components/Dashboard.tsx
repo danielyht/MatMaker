@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { Square, Lock, Rocket, Cookie, Apple } from 'lucide-react';
+import { Square, Lock, Rocket, Cookie, Apple, Zap } from 'lucide-react';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -40,6 +40,15 @@ export function Dashboard() {
       cor: '#c77dff',
       bloqueado: true,
       rota: null,
+    },
+    {
+      id: 5,
+      nome: 'Potências ao quadrado',
+      descricao: 'Quadrados pintados e potências ao quadrado.',
+      icone: Zap,
+      cor: '#7c3aed',
+      bloqueado: false,
+      rota: '/potencias-quadrado',
     },
   ];
 
