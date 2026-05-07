@@ -7,6 +7,7 @@ import { DoubleGame } from './components/DoubleGame';
 import { SquarePowerGame } from './components/SquarePowerGame';
 import { PercentGame } from './components/PercentGame';
 import { MarketChallengeGame } from './components/MarketChallengeGame';
+import { MaterialDouradoGame } from './components/MaterialDouradoGame';
 
 export const roteador = createBrowserRouter([
   {
@@ -40,5 +41,9 @@ export const roteador = createBrowserRouter([
   {
     path: '/desafio-mercado',
     Component: MarketChallengeGame,
+  },
+  {
+    path: '/material-dourado',
+    Component: MaterialDouradoGame,
   },
 ]);

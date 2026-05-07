@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { Rocket, Cookie, Apple, Zap, Percent, ShoppingBag } from 'lucide-react';
+import { Rocket, Cookie, Apple, Zap, Percent, ShoppingBag, Layers3 } from 'lucide-react';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -58,6 +58,15 @@ export function Dashboard() {
       cor: '#059669',
       bloqueado: false,
       rota: '/desafio-mercado',
+    },
+    {
+      id: 7,
+      nome: 'Material dourado',
+      descricao: 'Monte centenas, dezenas e unidades.',
+      icone: Layers3,
+      cor: '#d97706',
+      bloqueado: false,
+      rota: '/material-dourado',
     },
   ];
 
