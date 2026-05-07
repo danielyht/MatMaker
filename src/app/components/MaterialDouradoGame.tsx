@@ -157,7 +157,6 @@ export function MaterialDouradoGame() {
   const [blocos, setBlocos] = useState<BlocoMontado[]>([]);
   const [proximoId, setProximoId] = useState(1);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
-  const [mostrarDica, setMostrarDica] = useState(false);
   const [pontos, setPontos] = useState(0);
 
   useEffect(() => {
@@ -166,7 +165,6 @@ export function MaterialDouradoGame() {
     setBlocos([]);
     setProximoId(1);
     setFeedback('idle');
-    setMostrarDica(false);
     setPontos(0);
   }, []);
 
@@ -175,7 +173,6 @@ export function MaterialDouradoGame() {
   useEffect(() => {
     setBlocos([]);
     setFeedback('idle');
-    setMostrarDica(false);
   }, [indice]);
 
   if (!pergunta) return null;
@@ -195,7 +192,6 @@ export function MaterialDouradoGame() {
     setProximoId((n) => n + 1);
     if (feedback !== 'idle') {
       setFeedback('idle');
-      setMostrarDica(false);
     }
   };
 
@@ -203,19 +199,16 @@ export function MaterialDouradoGame() {
     setBlocos((prev) => prev.filter((b) => b.id !== id));
     if (feedback !== 'idle') {
       setFeedback('idle');
-      setMostrarDica(false);
     }
   };
 
   const confirmar = () => {
     if (atual.c === esperado.c && atual.d === esperado.d && atual.u === esperado.u) {
       setFeedback('certo');
-      setMostrarDica(false);
       setPontos((p) => p + PONTOS);
       playSomSucesso();
     } else {
       setFeedback('errado');
-      setMostrarDica(true);
       playSomErro();
     }
   };
@@ -432,7 +425,6 @@ export function MaterialDouradoGame() {
               onClick={() => {
                 setBlocos([]);
                 setFeedback('idle');
-                setMostrarDica(false);
               }}
               disabled={feedback === 'certo'}
               className="min-h-11 rounded-xl border border-border bg-background px-6 py-2.5 text-sm font-semibold disabled:opacity-45"
@@ -489,11 +481,6 @@ export function MaterialDouradoGame() {
             </div>
           )}
 
-          {mostrarDica && feedback === 'errado' && (
-            <div className="rounded-xl border border-sky-200 bg-sky-50 p-3 text-center text-sm text-sky-950">
-              <strong>Dica:</strong> resultado {pergunta.resultado} = {esperado.c} centena(s), {esperado.d} dezena(s) e {esperado.u} unidade(s).
-            </div>
-          )}
         </div>
       </div>
     </div>
