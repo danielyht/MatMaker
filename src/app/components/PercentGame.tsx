@@ -344,7 +344,7 @@ export function PercentGame() {
 
   if (!nivel) {
     return (
-      <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-gradient-to-b from-sky-50 via-white to-teal-50/70 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-[#C7D5FC] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <header className="flex items-center justify-between border-b border-sky-100/80 bg-white/90 px-4 py-3 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-sm backdrop-blur-sm sm:px-5">
           <button
             type="button"
@@ -419,7 +419,7 @@ export function PercentGame() {
   if (!pergunta) return null;
 
   return (
-    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-gradient-to-b from-sky-50 via-white to-teal-50/70 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-[#C7D5FC] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <header className="flex items-center justify-between border-b border-sky-100/80 bg-white/90 px-3 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-sm backdrop-blur-sm sm:px-4">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <button

@@ -466,7 +466,7 @@ export function FractionsGame() {
   const podeConfirmar = numerador > 0 && denominador > 0 && numerador <= denominador;
 
   return (
-    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden overflow-y-auto bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden overflow-y-auto bg-[#C7D5FC] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="flex items-center justify-between border-b border-amber-100 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-4">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <button
