@@ -33,23 +33,6 @@ function intAleatorio(min: number, max: number) {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
-function decompor(n: number) {
-  return {
-    c: Math.floor(n / 100),
-    d: Math.floor((n % 100) / 10),
-    u: n % 10,
-  };
-}
-
-function contar(blocos: BlocoMontado[]) {
-  const unidades = blocos.filter((b) => b.tipo === 'u');
-  return {
-    c: blocos.filter((b) => b.tipo === 'c').length,
-    d: blocos.filter((b) => b.tipo === 'd').length,
-    u: unidades.length,
-  };
-}
-
 /** Operandos e resultado até 150; inclui contas só com números &lt; 100 e contas com algum valor ≥ 100. */
 function montarPerguntas(): PerguntaMD[] {
   const vistos = new Set<string>();
@@ -438,12 +421,6 @@ export function MaterialDouradoGame() {
 
   if (!pergunta) return null;
 
-  const esperadoA = decompor(pergunta.a);
-  const esperadoB = decompor(pergunta.b);
-
-  const atualA = contar(blocosA);
-  const atualB = contar(blocosB);
-
   const ultima = feedback === 'certo' && indice === perguntas.length - 1;
 
   const setLista = (zona: Zona, fn: (prev: BlocoMontado[]) => BlocoMontado[]) => {
@@ -464,11 +441,9 @@ export function MaterialDouradoGame() {
   };
 
   const confirmar = () => {
-    const okA = atualA.c === esperadoA.c && atualA.d === esperadoA.d && atualA.u === esperadoA.u;
-    const okB = atualB.c === esperadoB.c && atualB.d === esperadoB.d && atualB.u === esperadoB.u;
     const n = Number(String(resposta).trim().replace(',', '.'));
     const okNum = Number.isFinite(n) && Math.round(n) === pergunta.resultado;
-    if (okA && okB && okNum) {
+    if (okNum) {
       setFeedback('certo');
       setPontos((p) => p + PONTOS);
       playSomSucesso();
@@ -541,7 +516,7 @@ export function MaterialDouradoGame() {
         </div>
 
         <p className="mb-1.5 shrink-0 text-center text-sm leading-snug text-muted-foreground sm:text-sm">
-          Arraste centena, dezena ou unidade para cada coluna.
+          Brinque ou teste nas colunas abaixo.
         </p>
 
         {/* Faixa única: blocos + campo Resultado compacto */}
