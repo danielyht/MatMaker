@@ -5,40 +5,131 @@ import { ChevronLeft, Check, X, ArrowUp, ArrowDown, Cookie } from 'lucide-react'
 interface Pergunta {
   id: number;
   texto: string;
+  /** Resposta canônica (geralmente irredutível); equivalentes também contam. */
   numeradorCorreto: number;
   denominadorCorreto: number;
+}
+
+function mdc(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) {
+    const t = x % y;
+    x = y;
+    y = t;
+  }
+  return x || 1;
+}
+
+/** Fração positiva na forma mais simples (para exibir o gabarito). */
+function reduzirFrac(n: number, d: number): [number, number] {
+  if (d <= 0 || n < 0) return [n, d];
+  const g = mdc(n, d);
+  return [n / g, d / g];
+}
+
+function fracoesEquivalentes(n1: number, d1: number, n2: number, d2: number): boolean {
+  if (d1 <= 0 || d2 <= 0 || n1 < 0 || n2 < 0) return false;
+  return n1 * d2 === n2 * d1;
 }
 
 const PERGUNTAS: Pergunta[] = [
   {
     id: 1,
-    texto: 'Maria tem uma pizza dividida em 8 pedaços iguais. Ela separou 3 pedaços. Qual é a fração?',
+    texto:
+      'Maria tem uma pizza em 8 fatias iguais e come exatamente 3 fatias. Escreva a fração da pizza que ela comeu.',
     numeradorCorreto: 3,
     denominadorCorreto: 8,
   },
   {
     id: 2,
-    texto: 'João dividiu a pizza em 4 pedaços e separou 1. Qual é a fração?',
-    numeradorCorreto: 1,
-    denominadorCorreto: 4,
+    texto: 'Calcule e escreva o resultado: 2/7 + 3/7 (mesmo denominador).',
+    numeradorCorreto: 5,
+    denominadorCorreto: 7,
   },
   {
     id: 3,
-    texto: 'Ana dividiu a pizza em 10 pedaços e separou 6. Qual é a fração?',
-    numeradorCorreto: 6,
+    texto:
+      'Um reservatório estava 9/10 cheio de água. Retirou-se 2/10 para regar. Com que fração do reservatório ele ficou cheio depois disso?',
+    numeradorCorreto: 7,
     denominadorCorreto: 10,
   },
   {
     id: 4,
-    texto: 'Pedro dividiu a pizza em 6 pedaços e separou 2. Qual é a fração?',
-    numeradorCorreto: 2,
-    denominadorCorreto: 6,
+    texto:
+      'De 10 alunos convocados, 4 faltaram à apresentação. Escreva em fração irredutível a parte dos alunos que compareceu.',
+    numeradorCorreto: 3,
+    denominadorCorreto: 5,
   },
   {
     id: 5,
-    texto: 'Carla dividiu a pizza em 10 pedaços e separou 9. Qual é a fração?',
-    numeradorCorreto: 9,
+    texto:
+      'Em um pacote com 10 guloseimas iguais, 3 são de chocolate e o restante é de fruta. Que fração do pacote é de fruta?',
+    numeradorCorreto: 7,
     denominadorCorreto: 10,
+  },
+  {
+    id: 6,
+    texto:
+      'Em um experimento, 2/5 das sementes não germinaram. Que fração das sementes germinou (a parte “boa”)?',
+    numeradorCorreto: 3,
+    denominadorCorreto: 5,
+  },
+  {
+    id: 7,
+    texto: 'Simplifique 8/10 ao máximo (escreva a fração irredutível).',
+    numeradorCorreto: 4,
+    denominadorCorreto: 5,
+  },
+  {
+    id: 8,
+    texto: 'Some 1/6 + 2/6 e dê o resultado na forma irredutível.',
+    numeradorCorreto: 1,
+    denominadorCorreto: 2,
+  },
+  {
+    id: 9,
+    texto: 'Simplifique 8/12 ao máximo.',
+    numeradorCorreto: 2,
+    denominadorCorreto: 3,
+  },
+  {
+    id: 10,
+    texto: 'Uma faixa tem 8 quadrados iguais. Pintaram-se 5 e depois mais 2. Que fração da faixa ficou pintada no total?',
+    numeradorCorreto: 7,
+    denominadorCorreto: 8,
+  },
+  {
+    id: 11,
+    texto: 'Uma torta foi cortada em 12 pedaços iguais e sobraram 5 inteiros na mesa. Que fração da torta inteira ainda está lá?',
+    numeradorCorreto: 5,
+    denominadorCorreto: 12,
+  },
+  {
+    id: 12,
+    texto:
+      'Uma hora foi pensada em 6 blocos iguais de 10 minutos. Dez minutos correspondem a que fração dessa hora?',
+    numeradorCorreto: 1,
+    denominadorCorreto: 6,
+  },
+  {
+    id: 13,
+    texto: 'Calcule 9/10 − 5/10 e escreva o resultado na forma irredutível.',
+    numeradorCorreto: 2,
+    denominadorCorreto: 5,
+  },
+  {
+    id: 14,
+    texto:
+      'Um tanque comporta 1 litro. Primeiro encheu-se 3/4 do tanque e depois mais 1/4. Que fração do tanque ficou cheia no final?',
+    numeradorCorreto: 1,
+    denominadorCorreto: 1,
+  },
+  {
+    id: 15,
+    texto: 'Simplifique 15/18 ao máximo.',
+    numeradorCorreto: 5,
+    denominadorCorreto: 6,
   },
 ];
 
@@ -437,7 +528,9 @@ export function FractionsGame() {
   const perguntaAtual = PERGUNTAS[perguntaAtualIndex];
 
   function verificarResposta() {
-    if (numerador === perguntaAtual.numeradorCorreto && denominador === perguntaAtual.denominadorCorreto) {
+    if (
+      fracoesEquivalentes(numerador, denominador, perguntaAtual.numeradorCorreto, perguntaAtual.denominadorCorreto)
+    ) {
       setEstado('correto');
       setPontuacao((prev) => prev + 1);
     } else {
@@ -519,7 +612,7 @@ export function FractionsGame() {
             valor={numerador}
             aoMudar={setNumerador}
             label="Numerador"
-            max={denominador || 10}
+            max={denominador || 18}
             cor="#3b82f6"
           />
 
@@ -544,7 +637,7 @@ export function FractionsGame() {
             aoMudar={setDenominador}
             label="Denominador"
             min={1}
-            max={10}
+            max={18}
             cor="#f97316"
           />
         </div>
@@ -571,13 +664,20 @@ export function FractionsGame() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center bg-white rounded-lg p-1.5">
-                  <div className="text-lg font-bold text-green-600" style={{ fontFamily: 'Georgia, serif' }}>
-                    {perguntaAtual.numeradorCorreto}
-                  </div>
-                  <div className="w-8 h-0.5 bg-gray-800 rounded-full my-0.5" />
-                  <div className="text-lg font-bold text-green-600" style={{ fontFamily: 'Georgia, serif' }}>
-                    {perguntaAtual.denominadorCorreto}
-                  </div>
+                  {(() => {
+                    const [r, d] = reduzirFrac(perguntaAtual.numeradorCorreto, perguntaAtual.denominadorCorreto);
+                    return (
+                      <>
+                        <div className="text-lg font-bold text-green-600" style={{ fontFamily: 'Georgia, serif' }}>
+                          {r}
+                        </div>
+                        <div className="w-8 h-0.5 bg-gray-800 rounded-full my-0.5" />
+                        <div className="text-lg font-bold text-green-600" style={{ fontFamily: 'Georgia, serif' }}>
+                          {d}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
               <button

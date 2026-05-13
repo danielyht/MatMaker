@@ -4,7 +4,7 @@ import { ChevronLeft, Check, X, Sparkles, ShoppingBag } from 'lucide-react';
 import { Progress } from './ui/progress';
 
 const PONTOS_POR_ACERTO = 50;
-const TOTAL_PERGUNTAS = 12;
+const TOTAL_PERGUNTAS = 15;
 
 type NivelP = 'facil' | 'medio' | 'dificil';
 

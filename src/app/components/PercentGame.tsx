@@ -9,6 +9,8 @@ const PONTOS = { facil: 35, medio: 45, dificil: 55 } as const;
 
 const PARTES = 100;
 const COLS = 10;
+/** Número de perguntas por nível em todos os modos. */
+const FASES_POR_NIVEL = 15;
 
 /** Fácil: percentagens “redondas”. */
 const POOL_FACIL = [10, 25, 50, 75];
@@ -101,7 +103,9 @@ function montarListaNivel(nivel: Nivel): PerguntaPercent[] {
   const lista: PerguntaPercent[] = [];
 
   if (nivel === 'facil') {
-    const percents = embaralhar([...POOL_FACIL]);
+    const percents = embaralhar(
+      Array.from({ length: FASES_POR_NIVEL }, (_, i) => POOL_FACIL[i % POOL_FACIL.length]),
+    );
     percents.forEach((pct, i) => {
       const semente = `facil|${i}|${pct}`;
       lista.push({
@@ -115,7 +119,7 @@ function montarListaNivel(nivel: Nivel): PerguntaPercent[] {
       });
     });
   } else if (nivel === 'medio') {
-    const percents = embaralhar([...POOL_MEDIO]).slice(0, 4);
+    const percents = embaralhar([...POOL_MEDIO]).slice(0, FASES_POR_NIVEL);
     percents.forEach((pct, i) => {
       const semente = `medio|${i}|${pct}`;
       const emBranco = i % 2 === 1;
@@ -133,11 +137,19 @@ function montarListaNivel(nivel: Nivel): PerguntaPercent[] {
       });
     });
   } else {
+    /** Pares vermelho+azul + ímpares só vermelho = 15 perguntas. */
     const pares: [number, number][] = [
       [20, 15],
       [25, 10],
+      [17, 13],
+      [12, 18],
+      [22, 8],
+      [14, 21],
+      [19, 16],
+      [11, 26],
+      [16, 14],
     ];
-    const odds = embaralhar([...POOL_DIFICIL_IMPAR]).slice(0, 2);
+    const odds = embaralhar([...POOL_DIFICIL_IMPAR]).slice(0, FASES_POR_NIVEL - pares.length);
 
     pares.forEach(([r, b], i) => {
       const semente = `dif|dc|${i}|${r}|${b}`;
@@ -249,27 +261,62 @@ function GradeCemPartes({
         </span>
         {azul.size > 0 && (
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-3 w-3 rounded-sm bg-blue-600" aria-hidden />
+            <span className="inline-block h-3 w-3 rounded-sm bg-sky-500" aria-hidden />
             Azul
           </span>
         )}
       </div>
       <div
-        className="mx-auto grid aspect-square w-full max-w-sm gap-px rounded-xl border border-slate-300 bg-slate-300 p-px shadow-inner sm:max-w-md"
-        style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
-        role="img"
-        aria-label="Grade de 100 quadradinhos"
+        className="mx-auto grid w-full max-w-sm gap-x-1 gap-y-px sm:max-w-md"
+        style={{
+          gridTemplateColumns: 'minmax(1.1rem, auto) minmax(0, 1fr)',
+          gridTemplateRows: 'auto minmax(0, 1fr)',
+        }}
       >
-        {Array.from({ length: PARTES }).map((_, idx) => {
-          const v = vermelho.has(idx);
-          const a = azul.has(idx);
-          let bg = 'bg-white dark:bg-card';
-          if (v) bg = 'bg-red-500';
-          else if (a) bg = 'bg-blue-600';
-          return (
-            <div key={idx} className={`aspect-square min-w-0 w-full rounded-[1px] sm:rounded-[2px] ${bg}`} />
-          );
-        })}
+        <span className="min-w-[1.1rem] shrink-0" aria-hidden />
+        <div
+          className="grid gap-px pb-0.5"
+          style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
+          aria-hidden
+        >
+          {Array.from({ length: COLS }, (_, c) => (
+            <div
+              key={c}
+              className="text-center text-[10px] font-semibold tabular-nums text-muted-foreground sm:text-[11px]"
+            >
+              {c + 1}
+            </div>
+          ))}
+        </div>
+        <div
+          className="grid gap-px pr-0.5"
+          style={{ gridTemplateRows: `repeat(${COLS}, minmax(0, 1fr))` }}
+          aria-hidden
+        >
+          {Array.from({ length: COLS }, (_, r) => (
+            <div
+              key={r}
+              className="flex items-center justify-end text-[10px] font-semibold tabular-nums text-muted-foreground sm:text-[11px]"
+            >
+              {r + 1}
+            </div>
+          ))}
+        </div>
+        <div
+          className="grid aspect-square w-full gap-px border border-black bg-black"
+          style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
+          role="img"
+          aria-label="Grade de 100 quadradinhos"
+        >
+          {Array.from({ length: PARTES }).map((_, idx) => {
+            const v = vermelho.has(idx);
+            const a = azul.has(idx);
+            let bg = 'bg-white dark:bg-card';
+            if (v) bg = 'bg-red-500';
+            else if (a) bg = 'bg-sky-500';
+            return <div key={idx} className={`aspect-square min-w-0 w-full ${bg}`} />;
+          })}
+        </div>
       </div>
       <p className="text-center text-[11px] text-muted-foreground">100 quadradinhos = 100%</p>
     </div>
@@ -390,7 +437,7 @@ export function PercentGame() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xl font-bold text-foreground sm:text-2xl">Médio</p>
                   <p className="mt-1 text-base leading-snug text-muted-foreground sm:text-lg">
-                    Múltiplos de 5 — também o que falta em branco.
+                    Quanto falta?
                   </p>
                 </div>
               </button>
@@ -405,7 +452,7 @@ export function PercentGame() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xl font-bold text-foreground sm:text-2xl">Difícil</p>
                   <p className="mt-1 text-base leading-snug text-muted-foreground sm:text-lg">
-                    Duas cores e percentagens mais finas.
+                    Duas cores.
                   </p>
                 </div>
               </button>

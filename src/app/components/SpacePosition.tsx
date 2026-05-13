@@ -2,6 +2,44 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Rocket, Target, Zap, Heart, Crosshair } from 'lucide-react';
 
+/** Quantidade de naves reais a eliminar (dicas em sequência) e balas disponíveis. */
+const INVASAO_NAVES_ALVO = 15;
+const INVASAO_BALAS_INICIAIS = 24;
+
+/**
+ * 8 posições por lado — centros em % do canvas.
+ * Grelha 3+3+2 bem espalhada nas faixas laterais (longe do laser), sem sobreposição dos ícones.
+ */
+const SLOTS_ESQUERDA = [
+  { x: 8, y: 12 },
+  { x: 21, y: 12 },
+  { x: 35, y: 12 },
+  { x: 8, y: 36 },
+  { x: 21, y: 36 },
+  { x: 35, y: 36 },
+  { x: 14, y: 60 },
+  { x: 29, y: 60 },
+];
+const SLOTS_DIREITA = [
+  { x: 65, y: 12 },
+  { x: 78, y: 12 },
+  { x: 92, y: 12 },
+  { x: 65, y: 36 },
+  { x: 78, y: 36 },
+  { x: 92, y: 36 },
+  { x: 71, y: 60 },
+  { x: 86, y: 60 },
+];
+
+function embaralhar<T>(itens: T[]): T[] {
+  const copia = [...itens];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
 function ModalConvocamento({ aoFechar, aoIniciar }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm sm:p-5">
@@ -45,11 +83,21 @@ function ModalConvocamento({ aoFechar, aoIniciar }) {
               <ul className="space-y-1.5 text-sm">
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 font-bold">✓</span>
-                  <span>Você tem <span className="font-bold text-yellow-300">5 balas</span> em sua nave</span>
+                  <span>
+                    Você tem <span className="font-bold text-yellow-300">{INVASAO_BALAS_INICIAIS} balas</span> em sua nave
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-red-400 font-bold">✗</span>
-                  <span>Se acertar um holograma, <span className="font-bold text-red-400">você perde!</span></span>
+                  <span>
+                    Se acertar um holograma, <span className="font-bold text-red-400">você perde!</span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 font-bold">✓</span>
+                  <span>
+                    Há <span className="font-bold text-yellow-300">{INVASAO_NAVES_ALVO} naves reais</span> — siga as dicas na ordem!
+                  </span>
                 </li>
               </ul>
             </div>
@@ -107,7 +155,7 @@ function ModalVitoria({ aoProximaFase, aoRepetir }) {
                 Parabéns, piloto!
               </p>
               <p className="text-sm leading-snug text-center text-white/90">
-                Você eliminou todas as <span className="font-bold text-emerald-400">5 naves</span>. Galáxia segura! 🛸
+                Você eliminou todas as <span className="font-bold text-emerald-400">{INVASAO_NAVES_ALVO} naves</span>. Galáxia segura! 🛸
               </p>
             </div>
 
@@ -127,7 +175,9 @@ function ModalVitoria({ aoProximaFase, aoRepetir }) {
               <p className="text-center text-white/60 text-[10px] mb-1.5">Resultados</p>
               <div className="grid grid-cols-3 gap-1.5">
                 <div className="bg-green-500/20 rounded-lg py-1.5 px-1 text-center">
-                  <p className="text-base font-bold text-green-400">5/5</p>
+                  <p className="text-base font-bold text-green-400">
+                    {INVASAO_NAVES_ALVO}/{INVASAO_NAVES_ALVO}
+                  </p>
                   <p className="text-[9px] text-white/60">Acertos</p>
                 </div>
                 <div className="bg-red-500/20 rounded-lg py-1.5 px-1 text-center">
@@ -187,9 +237,9 @@ function ModalDerrota({ aoRepetir, aoVoltar, acertos, erros }) {
                 Quase lá!
               </p>
               <p className="text-sm leading-snug text-center text-white/90">
-                {acertos === 5
+                {acertos === INVASAO_NAVES_ALVO
                   ? 'Todas as naves caíram, mas a precisão não foi total. Treine de novo!'
-                  : `Você acertou ${acertos}/5 naves. Sem balas — tente outra vez!`}
+                  : `Você acertou ${acertos}/${INVASAO_NAVES_ALVO} naves. Sem balas — tente outra vez!`}
               </p>
             </div>
 
@@ -209,7 +259,9 @@ function ModalDerrota({ aoRepetir, aoVoltar, acertos, erros }) {
               <p className="text-center text-white/60 text-[10px] mb-1.5">Resultados</p>
               <div className="grid grid-cols-3 gap-1.5">
                 <div className="bg-green-500/20 rounded-lg py-1.5 px-1 text-center">
-                  <p className="text-base font-bold text-green-400">{acertos}/5</p>
+                  <p className="text-base font-bold text-green-400">
+                    {acertos}/{INVASAO_NAVES_ALVO}
+                  </p>
                   <p className="text-[9px] text-white/60">Acertos</p>
                 </div>
                 <div className="bg-red-500/20 rounded-lg py-1.5 px-1 text-center">
@@ -255,7 +307,7 @@ export function SpacePosition() {
   const [naves, setNaves] = useState([]);
   const [navesReaisOrdenadas, setNavesReaisOrdenadas] = useState([]); // Lista fixa para as dicas
   const [dicaAtual, setDicaAtual] = useState(0);
-  const [balasRestantes, setBalasRestantes] = useState(5);
+  const [balasRestantes, setBalasRestantes] = useState(INVASAO_BALAS_INICIAIS);
   const [navesAcertadas, setNavesAcertadas] = useState([]);
   const [navesErradas, setNavesErradas] = useState([]); // Rastrear erros
   const [estadoJogo, setEstadoJogo] = useState('jogando'); // 'jogando', 'vitoria', 'derrota'
@@ -278,6 +330,8 @@ export function SpacePosition() {
       { nome: 'amarela', cor: '#e6d06e' },
       { nome: 'laranja', cor: '#e0a15f' },
       { nome: 'rosa', cor: '#d687b6' },
+      { nome: 'cinza', cor: '#94a3b8' },
+      { nome: 'roxa', cor: '#c084fc' },
     ];
 
     const configNaves = [
@@ -291,53 +345,29 @@ export function SpacePosition() {
     navesEsquerda.sort(() => Math.random() - 0.5);
     navesDireita.sort(() => Math.random() - 0.5);
 
-    const reaisEsquerda = navesEsquerda.slice(0, 2);
-    const reaisDireita = navesDireita.slice(0, 3);
+    const reaisEsquerda = navesEsquerda.slice(0, 8);
+    const reaisDireita = navesDireita.slice(0, 7);
 
     const navesReais = [...reaisEsquerda, ...reaisDireita];
     const navesFalsas = configNaves.filter(
       (n) => !navesReais.some((nr) => nr.nome === n.nome && nr.posicao === n.posicao),
     );
-    
-    // Distância mínima entre centros (% do canvas). No celular os ícones são grandes em px —
-    // valores maiores evitam naves “grudadas”.
-    function estaProxima(x, y, navesExistentes, distanciaMinima = 26) {
-      return navesExistentes.some((nave) => {
-        const distanciaX = Math.abs(nave.x - x);
-        const distanciaY = Math.abs(nave.y - y);
-        const distancia = Math.sqrt(distanciaX ** 2 + distanciaY ** 2);
-        return distancia < distanciaMinima;
-      });
-    }
 
-    // Faixas horizontais mais afastadas do centro (zona do laser) para caber melhor no telefone.
-    function gerarPosicaoValida(ehDireita, navesExistentes) {
-      const maxTentativas = 160;
-      let tentativa = 0;
+    const filaEsquerda = embaralhar(SLOTS_ESQUERDA);
+    const filaDireita = embaralhar(SLOTS_DIREITA);
 
-      while (tentativa < maxTentativas) {
-        const x = ehDireita
-          ? Math.random() * 33 + 62 // direita: 62–95%
-          : Math.random() * 33 + 5; // esquerda: 5–38%
-        const y = Math.random() * 66 + 14; // 14–80%
-
-        if (!estaProxima(x, y, navesExistentes)) {
-          return { x, y };
-        }
-
-        tentativa++;
+    function consumirSlot(posicao: 'esquerda' | 'direita') {
+      const fila = posicao === 'direita' ? filaDireita : filaEsquerda;
+      const slot = fila.pop();
+      if (!slot) {
+        return posicao === 'direita' ? { x: 75, y: 40 } : { x: 19, y: 40 };
       }
-
-      const fallbackX = ehDireita ? 66 + Math.random() * 26 : 6 + Math.random() * 26;
-      const fallbackY = 22 + Math.random() * 48;
-
-      return { x: fallbackX, y: fallbackY };
+      return slot;
     }
-    
+
     // Criar naves REAIS
     navesReais.forEach((corInfo, index) => {
-      const ehDireita = corInfo.posicao === 'direita';
-      const { x, y } = gerarPosicaoValida(ehDireita, novasNaves);
+      const { x, y } = consumirSlot(corInfo.posicao);
       
       novasNaves.push({
         id: `real-${corInfo.posicao}-${index}-${corInfo.nome}`,
@@ -353,8 +383,7 @@ export function SpacePosition() {
     
     // Criar naves FALSAS
     navesFalsas.forEach((corInfo, index) => {
-      const ehDireita = corInfo.posicao === 'direita';
-      const { x, y } = gerarPosicaoValida(ehDireita, novasNaves);
+      const { x, y } = consumirSlot(corInfo.posicao);
       
       novasNaves.push({
         id: `falsa-${corInfo.posicao}-${index}-${corInfo.nome}`,
@@ -375,77 +404,36 @@ export function SpacePosition() {
     const navesReaisLista = novasNaves.filter(n => n.tipo === 'real');
     const navesOrdenadas = navesReaisLista.sort((a, b) => a.x - b.x);
     setNavesReaisOrdenadas(navesOrdenadas);
-    
-    console.log('🎮 NAVES REAIS GERADAS (ordem das dicas):');
-    navesOrdenadas.forEach((n, i) => {
-      console.log(`  ${i + 1}. ${n.nome.toUpperCase()} (${n.posicao}) - ID: ${n.id} - X: ${n.x.toFixed(1)}% - Cor: ${n.cor}`);
-    });
-    
-    console.log('📊 DISTRIBUIÇÃO COMPLETA:');
-    console.log('  ESQUERDA - REAIS:', novasNaves.filter(n => n.posicao === 'esquerda' && n.tipo === 'real').map(n => n.nome));
-    console.log('  ESQUERDA - FALSAS:', novasNaves.filter(n => n.posicao === 'esquerda' && n.tipo === 'falsa').map(n => n.nome));
-    console.log('  DIREITA - REAIS:', novasNaves.filter(n => n.posicao === 'direita' && n.tipo === 'real').map(n => n.nome));
-    console.log('  DIREITA - FALSAS:', novasNaves.filter(n => n.posicao === 'direita' && n.tipo === 'falsa').map(n => n.nome));
-    
-    // Verificar cores repetidas
-    const coresNaEsquerda = new Set(novasNaves.filter(n => n.posicao === 'esquerda').map(n => n.nome));
-    const coresNaDireita = new Set(novasNaves.filter(n => n.posicao === 'direita').map(n => n.nome));
-    const coresEmAmbos = [...coresNaEsquerda].filter(c => coresNaDireita.has(c));
-    console.log('🔄 CORES PRESENTES EM AMBOS LADOS:', coresEmAmbos);
   }
 
   function clicarNave(nave) {
     if (estadoJogo !== 'jogando' || nave.destruida || balasRestantes === 0) return;
 
-    // Verificar se é a nave certa (a da dica atual)
     const naveAlvo = navesReaisOrdenadas[dicaAtual];
-    
-    console.log('Clicou na nave:', { id: nave.id, nome: nave.nome, cor: nave.cor, tipo: nave.tipo });
-    console.log('Nave alvo esperada:', { id: naveAlvo.id, nome: naveAlvo.nome, cor: naveAlvo.cor });
-    console.log('Comparação:', nave.id === naveAlvo.id ? 'ACERTOU!' : 'ERROU!');
-    
-    // Decrementar balas independente de acerto ou erro
+
     const novoBalasRestantes = balasRestantes - 1;
     setBalasRestantes(novoBalasRestantes);
-    
+
     if (nave.id === naveAlvo.id) {
-      // ACERTOU!
-      console.log('✅ ACERTOU A NAVE CERTA!');
-      setNaves(prev => prev.map(n => 
-        n.id === nave.id ? { ...n, destruida: true } : n
-      ));
-      
+      setNaves((prev) => prev.map((n) => (n.id === nave.id ? { ...n, destruida: true } : n)));
+
       const novosAcertos = navesAcertadas.length + 1;
-      setNavesAcertadas(prev => [...prev, nave.id]);
-      
-      // Verificar vitória (acertou todas as 5 naves)
-      if (novosAcertos === 5) {
-        console.log('🎉 VITÓRIA!');
+      setNavesAcertadas((prev) => [...prev, nave.id]);
+
+      if (novosAcertos === INVASAO_NAVES_ALVO) {
         setEstadoJogo('vitoria');
       } else if (novoBalasRestantes === 0) {
-        // Acabaram as balas mas não acertou todas
-        console.log('❌ DERROTA - Balas acabaram!');
         setEstadoJogo('derrota');
       } else {
-        console.log('➡️ Próxima dica:', dicaAtual + 1);
-        setDicaAtual(prev => prev + 1);
+        setDicaAtual((prev) => prev + 1);
       }
     } else {
-      // ERROU!
-      console.log('❌ ERROU! Tipo da nave clicada:', nave.tipo);
-      setNavesErradas(prev => [...prev, nave.id]);
-      
-      // Marcar a nave falsa como "errada" visualmente
-      setNaves(prev => prev.map(n => 
-        n.id === nave.id ? { ...n, destruida: true } : n
-      ));
-      
-      // Verificar se acabaram as balas ou se ainda tem chance
+      setNavesErradas((prev) => [...prev, nave.id]);
+
+      setNaves((prev) => prev.map((n) => (n.id === nave.id ? { ...n, destruida: true } : n)));
+
       if (novoBalasRestantes === 0) {
-        console.log('❌ DERROTA - Balas acabaram!');
         setEstadoJogo('derrota');
-      } else {
-        console.log('⚠️ Errou mas ainda tem balas:', novoBalasRestantes);
       }
     }
   }
@@ -453,7 +441,7 @@ export function SpacePosition() {
   function reiniciarJogo() {
     setNaves([]);
     setDicaAtual(0);
-    setBalasRestantes(5);
+    setBalasRestantes(INVASAO_BALAS_INICIAIS);
     setNavesAcertadas([]);
     setNavesErradas([]); // Limpar erros
     setEstadoJogo('jogando');
@@ -539,7 +527,7 @@ export function SpacePosition() {
           <div className="flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/20 px-2.5 py-1.5 sm:gap-2 sm:px-4 sm:py-2">
             <Crosshair className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
             <span className="whitespace-nowrap text-xs font-bold text-white sm:text-base">
-              {balasRestantes} / 5 balas
+              {balasRestantes} / {INVASAO_BALAS_INICIAIS} balas
             </span>
           </div>
         )}
@@ -711,7 +699,7 @@ export function SpacePosition() {
             <div className="mb-3 rounded-xl bg-white/10 p-3 sm:mb-4 sm:rounded-2xl sm:p-4">
               <p className="mb-1.5 text-[11px] text-white/70 sm:mb-2 sm:text-sm">Progresso</p>
               <div className="flex gap-1.5 sm:gap-2">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(INVASAO_NAVES_ALVO)].map((_, i) => (
                   <div
                     key={i}
                     className={`h-1.5 flex-1 rounded-full sm:h-2 ${
@@ -721,7 +709,7 @@ export function SpacePosition() {
                 ))}
               </div>
               <p className="mt-1.5 text-center text-xs font-bold text-white sm:mt-2 sm:text-base">
-                {navesAcertadas.length} / 5 naves
+                {navesAcertadas.length} / {INVASAO_NAVES_ALVO} naves
               </p>
             </div>
 

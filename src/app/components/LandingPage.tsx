@@ -1,9 +1,7 @@
-import { useNavigate } from 'react-router';
-import { Compass, Rocket, Triangle, Trophy } from 'lucide-react';
+import { Compass, Layers, Rocket } from 'lucide-react';
+import { Navbar } from './Navbar';
 
 export function LandingPage() {
-  const navegar = useNavigate();
-
   const diferenciais = [
     {
       titulo: 'Missões interativas',
@@ -18,32 +16,26 @@ export function LandingPage() {
       icone: Compass,
     },
     {
-      titulo: 'Evolução contínua',
+      titulo: 'Conceitos sob muitos ângulos',
       descricao:
-        'Acompanhe seu progresso e desbloqueie novos objetivos no laboratório.',
-      icone: Trophy,
+        'Figuras, frações e situações do dia a dia mostram cada ideia de formas diferentes, para encaixar no jeito que você pensa melhor.',
+      icone: Layers,
     },
   ];
 
   return (
     <div className="relative min-h-[100dvh] overflow-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute -left-24 top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute right-8 top-12 h-48 w-48 rounded-full bg-[var(--color-success)]/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-10 right-1/4 h-40 w-40 rounded-full bg-[var(--color-warning)]/20 blur-3xl" />
+      <Navbar />
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -left-24 top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute right-8 top-12 h-48 w-48 rounded-full bg-[var(--color-success)]/20 blur-3xl" />
+        <div className="absolute bottom-10 right-1/4 h-40 w-40 rounded-full bg-[var(--color-warning)]/20 blur-3xl" />
+      </div>
 
-      <header className="mx-auto flex w-full max-w-6xl items-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:px-6 sm:py-6 md:px-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-3xl bg-primary shadow-lg sm:h-12 sm:w-12">
-            <Triangle className="h-6 w-6 fill-white text-white sm:h-7 sm:w-7" />
-          </div>
-          <h1 className="text-2xl font-bold sm:text-3xl">MatMaker</h1>
-        </div>
-      </header>
-
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4 sm:gap-16 sm:px-6 sm:pb-16 sm:pt-8 md:px-8">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[calc(3.5rem+max(0.35rem,env(safe-area-inset-top,0px))+1rem)] sm:gap-8 sm:px-6 sm:pb-16 sm:pt-[calc(4rem+max(0.35rem,env(safe-area-inset-top,0px))+1rem)] md:px-8">
         <section className="max-w-2xl">
           <div className="space-y-5 sm:space-y-6">
-            <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:px-4 sm:text-sm">
+            <span className="mt-2 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:mt-3 sm:px-4 sm:text-sm">
               Plataforma educativa interativa
             </span>
             <h2 className="text-3xl font-bold leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl">
@@ -53,20 +45,6 @@ export function LandingPage() {
               O MatMaker combina jogos e desafios guiados para ajudar
               estudantes a aprender com autonomia, clareza e diversão.
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <button
-                onClick={() => navegar('/dashboard')}
-                className="min-h-12 w-full rounded-3xl bg-primary px-6 py-3.5 text-base font-semibold text-primary-foreground transition active:scale-[0.98] sm:min-h-0 sm:w-auto sm:px-8 sm:py-4 sm:text-lg md:hover:scale-[1.02] md:hover:bg-[#2C98B8] md:hover:shadow-xl"
-              >
-                Entrar no laboratório
-              </button>
-              <button
-                onClick={() => navegar('/fractions')}
-                className="min-h-12 w-full rounded-3xl border border-border bg-card px-6 py-3.5 text-base font-semibold transition active:bg-muted sm:min-h-0 sm:w-auto sm:px-8 sm:py-4 sm:text-lg md:hover:bg-muted"
-              >
-                Ir para frações
-              </button>
-            </div>
           </div>
         </section>
 

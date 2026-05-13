@@ -168,15 +168,35 @@ const PERGUNTAS_DIFICIL: PerguntaMercado[] = [
   },
 ];
 
+const NOMES_ROTACAO = [
+  'Maria',
+  'João',
+  'Ana',
+  'Pedro',
+  'Carla',
+  'Lucas',
+  'Sofia',
+  'Bruno',
+  'Helena',
+  'Rafael',
+  'Beatriz',
+  'Davi',
+  'Lara',
+  'Gustavo',
+  'Isabela',
+] as const;
+
+const FASES_DOUBLE = 15;
+
 function listaPorNivel(nivel: Nivel): PerguntaMercado[] {
-  switch (nivel) {
-    case 'facil':
-      return PERGUNTAS_FACIL;
-    case 'medio':
-      return PERGUNTAS_MEDIO;
-    case 'dificil':
-      return PERGUNTAS_DIFICIL;
-  }
+  const base = nivel === 'facil' ? PERGUNTAS_FACIL : nivel === 'medio' ? PERGUNTAS_MEDIO : PERGUNTAS_DIFICIL;
+  return Array.from({ length: FASES_DOUBLE }, (_, i) => {
+    const p = base[i % base.length];
+    const nome = NOMES_ROTACAO[i % NOMES_ROTACAO.length];
+    const primeiro = p.enunciado.match(/^[^\s]+/)?.[0] ?? 'Maria';
+    const enunciado = p.enunciado.replace(new RegExp(`\\b${primeiro}\\b`, 'g'), nome);
+    return { ...p, id: i + 1, enunciado };
+  });
 }
 
 function playSomSucesso() {

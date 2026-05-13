@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { Rocket, Cookie, Apple, Zap, Percent, ShoppingBag, Layers3 } from 'lucide-react';
+import { ChevronLeft, Rocket, Cookie, Apple, Zap, Percent, ShoppingBag, Layers3 } from 'lucide-react';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -53,7 +53,7 @@ export function Dashboard() {
     {
       id: 6,
       nome: 'Desafio do mercado',
-      descricao: '12 perguntas mistas, com centavos.',
+      descricao: '15 perguntas mistas, com centavos.',
       icone: ShoppingBag,
       cor: '#059669',
       bloqueado: false,
@@ -78,6 +78,15 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto min-h-[100dvh] max-w-7xl px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-8 md:px-8">
+      <button
+        type="button"
+        onClick={() => navegar('/')}
+        className="mb-5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-card text-foreground shadow-sm transition-colors hover:bg-muted sm:mb-6"
+        aria-label="Voltar ao início"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+
       <div className="mb-8 sm:mb-12">
         <h1 className="text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
           Olá, Construtor! 👋

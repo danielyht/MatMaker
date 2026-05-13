@@ -12,6 +12,9 @@ const BASES_FACIL_E_MEDIO = [2, 3, 4, 5];
 /** Difícil: bases 6 a 9. */
 const BASES_DIFICIL = [6, 7, 8, 9];
 
+/** Perguntas por nível (ciclos sobre as bases com figuras diferentes). */
+const FASES_POR_NIVEL = 15;
+
 const QUADRADOS_TOTAIS_PEQUENO = BASES_FACIL_E_MEDIO.map((b) => b * b);
 const QUADRADOS_TOTAIS_GRANDE = BASES_DIFICIL.map((b) => b * b);
 
@@ -120,11 +123,10 @@ function tipoFacilOuMedio(nivel: Nivel): TipoPergunta {
   return nivel === 'facil' ? 'potencia' : 'quantidade';
 }
 
-/** Quatro perguntas no difícil (uma por base): potência, quantidade, lado e mais um sorteado entre eles. */
-function misturaTiposDificil4(): TipoPergunta[] {
-  const b: [TipoPergunta, TipoPergunta, TipoPergunta] = ['potencia', 'quantidade', 'lado'];
-  const repete = b[intAleatorio(0, 2)];
-  return embaralhar([...b, repete] as TipoPergunta[]);
+/** Mistura de tipos no difícil (uma lista por sessão). */
+function misturaTiposDificilN(n: number): TipoPergunta[] {
+  const c: TipoPergunta[] = ['potencia', 'quantidade', 'lado'];
+  return embaralhar(Array.from({ length: n }, (_, i) => c[i % 3]));
 }
 
 function textoENMatiz(i: number, tipo: TipoPergunta): { texto: string; matiz: number } {
@@ -154,15 +156,13 @@ function montarListaNivel(nivel: Nivel): PerguntaQuadrado[] {
     dificil: BASES_DIFICIL,
   };
   const pool = basesPorNivel[nivel];
-  /** Sem repetir base n: no máximo uma pergunta por valor do pool (4 em cada nível). */
-  const repetir = pool.length;
-  const nsBase = embaralhar([...pool]);
-  const tiposDificil = nivel === 'dificil' ? misturaTiposDificil4() : [];
+  const nsBase = embaralhar(Array.from({ length: FASES_POR_NIVEL }, (_, idx) => pool[idx % pool.length]));
+  const tiposDificil = nivel === 'dificil' ? misturaTiposDificilN(FASES_POR_NIVEL) : [];
 
   const usados = new Set<string>();
   const lista: PerguntaQuadrado[] = [];
 
-  for (let i = 0; i < repetir; i++) {
+  for (let i = 0; i < FASES_POR_NIVEL; i++) {
     const n = nsBase[i];
     const tipo = nivel === 'dificil' ? tiposDificil[i] : tipoFacilOuMedio(nivel);
     const { texto, matiz } = textoENMatiz(i, tipo);
@@ -298,24 +298,56 @@ function GradeQuadradoPintado({
   matiz: number;
 }) {
   const tonal = CORES_MATIZ[Math.max(0, Math.min(CORES_MATIZ.length - 1, matiz))];
+  const colTemplate = `repeat(${outer}, minmax(0, 1fr))`;
+  const rowTemplate = `repeat(${outer}, minmax(0, 1fr))`;
+
   return (
     <div
-      className="mx-auto grid w-full max-w-md items-start gap-px rounded-xl border border-slate-300 bg-slate-300 p-px shadow-inner"
-      style={{ gridTemplateColumns: `repeat(${outer}, minmax(0, 1fr))` }}
-      role="img"
-      aria-label={`Grade ${outer} por ${outer} com um bloco pintado`}
+      className="mx-auto grid w-full max-w-md gap-x-1 gap-y-px"
+      style={{
+        gridTemplateColumns: 'minmax(1rem, auto) minmax(0, 1fr)',
+        gridTemplateRows: 'auto minmax(0, 1fr)',
+      }}
     >
-      {Array.from({ length: outer * outer }).map((_, idx) => {
-        const row = Math.floor(idx / outer);
-        const col = idx % outer;
-        const dentro = row >= offRow && row < offRow + n && col >= offCol && col < offCol + n;
-        return (
+      <span className="min-w-[1rem] shrink-0" aria-hidden />
+      <div className="grid gap-px pb-0.5" style={{ gridTemplateColumns: colTemplate }} aria-hidden>
+        {Array.from({ length: outer }, (_, c) => (
           <div
-            key={idx}
-            className={`aspect-square min-w-0 w-full rounded-[2px] sm:rounded-[3px] ${dentro ? tonal : 'bg-white dark:bg-card'}`}
-          />
-        );
-      })}
+            key={c}
+            className={`text-center font-semibold tabular-nums text-muted-foreground ${outer > 12 ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]'}`}
+          >
+            {c + 1}
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-px pr-0.5" style={{ gridTemplateRows: rowTemplate }} aria-hidden>
+        {Array.from({ length: outer }, (_, r) => (
+          <div
+            key={r}
+            className={`flex items-center justify-end font-semibold tabular-nums text-muted-foreground ${outer > 12 ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]'}`}
+          >
+            {r + 1}
+          </div>
+        ))}
+      </div>
+      <div
+        className="grid w-full items-start gap-px border border-black bg-black"
+        style={{ gridTemplateColumns: colTemplate }}
+        role="img"
+        aria-label={`Grade ${outer} por ${outer} com um bloco pintado`}
+      >
+        {Array.from({ length: outer * outer }).map((_, idx) => {
+          const row = Math.floor(idx / outer);
+          const col = idx % outer;
+          const dentro = row >= offRow && row < offRow + n && col >= offCol && col < offCol + n;
+          return (
+            <div
+              key={idx}
+              className={`aspect-square min-w-0 w-full ${dentro ? tonal : 'bg-white dark:bg-card'}`}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

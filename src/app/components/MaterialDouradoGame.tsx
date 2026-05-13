@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type DragEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type DragEvent, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, Sparkles, Layers3 } from 'lucide-react';
 
@@ -10,7 +10,7 @@ interface PerguntaMD {
   resultado: number;
 }
 
-const TOTAL_PERGUNTAS = 8;
+const TOTAL_PERGUNTAS = 15;
 const PONTOS = 45;
 type BlocoTipo = 'c' | 'd' | 'u';
 type Zona = 'a' | 'b';
@@ -398,6 +398,10 @@ export function MaterialDouradoGame() {
   const [proximoId, setProximoId] = useState(1);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
   const [pontos, setPontos] = useState(0);
+  /** Toque: escolher peça na paleta e tocar na coluna (HTML5 drag quase não funciona em telemóvel). */
+  const [pecaSelecionada, setPecaSelecionada] = useState<BlocoTipo | null>(null);
+  /** Evita que o "click" fantasma após soltar o arrastar ligue/desligue a seleção por toque. */
+  const fimArrasteEm = useRef(0);
 
   useEffect(() => {
     setPerguntas(montarPerguntas());
@@ -417,6 +421,7 @@ export function MaterialDouradoGame() {
     setBlocosB([]);
     setResposta('');
     setFeedback('idle');
+    setPecaSelecionada(null);
   }, [indice]);
 
   if (!pergunta) return null;
@@ -463,11 +468,25 @@ export function MaterialDouradoGame() {
     if (indice < perguntas.length - 1) setIndice((i) => i + 1);
   };
 
+  const tipoDoDataTransfer = (e: DragEvent): BlocoTipo | null => {
+    const plain = e.dataTransfer.getData('text/plain').trim();
+    if (plain === 'c' || plain === 'd' || plain === 'u') return plain;
+    const legacy = e.dataTransfer.getData('text/bloco-tipo').trim();
+    if (legacy === 'c' || legacy === 'd' || legacy === 'u') return legacy;
+    return null;
+  };
+
   const handleDrop = (e: DragEvent, zona: Zona) => {
     e.preventDefault();
-    const raw = e.dataTransfer.getData('text/bloco-tipo');
-    const tipo = raw as BlocoTipo;
-    if (tipo === 'c' || tipo === 'd' || tipo === 'u') addBloco(tipo, zona);
+    const tipo = tipoDoDataTransfer(e);
+    if (tipo) addBloco(tipo, zona);
+  };
+
+  const handleClickZona = (e: MouseEvent<HTMLDivElement>, zona: Zona) => {
+    if (!pecaSelecionada || feedback === 'certo') return;
+    if ((e.target as HTMLElement).closest('button')) return;
+    addBloco(pecaSelecionada, zona);
+    setPecaSelecionada(null);
   };
 
   return (
@@ -516,7 +535,10 @@ export function MaterialDouradoGame() {
         </div>
 
         <p className="mb-1.5 shrink-0 text-center text-sm leading-snug text-muted-foreground sm:text-sm">
-          Brinque ou teste nas colunas abaixo.
+          Arraste a peça para o primeiro ou segundo número, ou toque numa peça e depois na coluna.
+          {pecaSelecionada ? (
+            <span className="mt-0.5 block font-semibold text-primary">Toque na coluna onde quer colocar.</span>
+          ) : null}
         </p>
 
         {/* Faixa única: blocos + campo Resultado compacto */}
@@ -533,11 +555,29 @@ export function MaterialDouradoGame() {
               <div
                 draggable
                 onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', tipo);
                   e.dataTransfer.setData('text/bloco-tipo', tipo);
                   e.dataTransfer.effectAllowed = 'copy';
                 }}
-                className="flex cursor-grab items-center justify-center border-2 border-dashed border-sky-500/40 bg-white/75 p-1.5 shadow-sm active:cursor-grabbing"
-                aria-label={`Arrastar ${nome.toLowerCase()} para o primeiro ou segundo número`}
+                onDragEnd={() => {
+                  fimArrasteEm.current = Date.now();
+                }}
+                onClick={() => {
+                  if (Date.now() - fimArrasteEm.current < 500) return;
+                  setPecaSelecionada((s) => (s === tipo ? null : tipo));
+                  if (feedback !== 'idle') setFeedback('idle');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setPecaSelecionada((s) => (s === tipo ? null : tipo));
+                    if (feedback !== 'idle') setFeedback('idle');
+                  }
+                }}
+                className={`flex cursor-grab touch-manipulation select-none items-center justify-center border-2 border-dashed border-sky-500/40 bg-white/75 p-1.5 shadow-sm active:cursor-grabbing ${pecaSelecionada === tipo ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                aria-label={`Escolher ${nome.toLowerCase()} e arrastar ou tocar na coluna`}
               >
                 <BlocoVisual tipo={tipo} />
               </div>
@@ -587,12 +627,13 @@ export function MaterialDouradoGame() {
                 key={zona}
                 role="region"
                 aria-label={`Montagem do ${titulo.toLowerCase()}`}
-                className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-sky-300/50 bg-white/90 shadow-md ring-1 ring-sky-200/25"
+                className={`flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-sky-300/50 bg-white/90 shadow-md ${pecaSelecionada ? 'ring-2 ring-sky-500/45' : 'ring-1 ring-sky-200/25'}`}
                 onDragOver={(e) => {
                   e.preventDefault();
                   e.dataTransfer.dropEffect = 'copy';
                 }}
                 onDrop={(e) => handleDrop(e, zona)}
+                onClick={(e) => handleClickZona(e, zona)}
               >
                 <div className="shrink-0 space-y-1 border-b border-sky-200/50 bg-gradient-to-b from-white to-sky-50/50 px-3 py-2 sm:py-2.5">
                   <div className="flex items-start justify-between gap-2">
