@@ -2,8 +2,8 @@
 
 :root {
   --font-size: 16px;
-  --background: #C7D5FC;
-  --foreground: #2c3e50;
+  --background: #EBF4FA;
+  --foreground: #1e40af;
   --card: #ffffff;
   --card-foreground: #2c3e50;
   --popover: oklch(1 0 0);
@@ -41,8 +41,11 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Custom colors for MatMaker */
-  --color-success: #81d4a6;
+  --color-success: #ff8c00;
   --color-warning: #ffb347;
+  --color-action: #3498db;
+  --color-brand: #00cafc;
+  --surface-glass: rgba(255, 255, 255, 0.72);
 }
 
 .dark {
@@ -125,6 +128,10 @@
   );
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-action: var(--color-action);
+  --color-brand: var(--color-brand);
 }
 
 @layer base {

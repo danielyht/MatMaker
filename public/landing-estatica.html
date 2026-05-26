@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>MatMaker — Landing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: '#00CAFC',
+              brandDark: '#1E40AF',
+              brandSoft: '#B7E6F2',
+              sky: '#EBF4FA',
+            },
+            fontFamily: {
+              sans: ['Quicksand', 'system-ui', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @keyframes float-y {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-14px);
+        }
+      }
+      .float-slow {
+        animation: float-y 8s ease-in-out infinite;
+      }
+      .float-delayed {
+        animation: float-y 9s ease-in-out infinite;
+        animation-delay: var(--d, 0s);
+      }
+    </style>
+  </head>
+  <body class="min-h-[100dvh] overflow-hidden bg-sky font-sans text-brandDark antialiased">
+    <!-- Símbolos de fundo -->
+    <div class="pointer-events-none absolute inset-0 select-none" aria-hidden>
+      <span class="float-delayed absolute left-[6%] top-[14%] text-3xl font-bold opacity-[0.14]" style="--d: 0s">+</span>
+      <span class="float-delayed absolute left-[18%] top-[72%] text-5xl font-bold opacity-10" style="--d: 1.2s">−</span>
+      <span class="float-delayed absolute left-[82%] top-[22%] text-4xl font-bold opacity-[0.12]" style="--d: 0.6s">÷</span>
+      <span class="float-delayed absolute left-[88%] top-[68%] text-6xl font-bold opacity-[0.08]" style="--d: 2s">%</span>
+      <span class="float-delayed absolute left-[42%] top-[8%] text-2xl font-bold opacity-[0.11]" style="--d: 0.3s">=</span>
+      <span class="float-delayed absolute left-[55%] top-[88%] text-4xl font-bold opacity-10" style="--d: 1.5s">^</span>
+      <span class="float-delayed absolute left-[72%] top-[42%] text-2xl font-bold opacity-[0.09]" style="--d: 2.4s">+</span>
+      <span class="float-delayed absolute left-[28%] top-[38%] text-5xl font-bold opacity-[0.07]" style="--d: 0.9s">×</span>
+    </div>
+
+    <div class="pointer-events-none absolute -left-20 top-1/4 h-64 w-64 rounded-full bg-brand/15 blur-3xl"></div>
+    <div class="pointer-events-none absolute -right-16 bottom-1/4 h-56 w-56 rounded-full bg-brandSoft/60 blur-3xl"></div>
+
+    <!-- Cards flutuantes -->
+    <div class="pointer-events-none absolute inset-0 hidden sm:block" aria-hidden>
+      <div
+        class="float-delayed absolute left-[6%] top-[18%] w-40 -rotate-12 rounded-2xl border-2 border-white/80 bg-white/75 p-3 shadow-lg backdrop-blur-sm"
+        style="--d: 0.2s"
+      >
+        <p class="text-[10px] font-bold uppercase tracking-wider text-brandDark/70">Desafio</p>
+        <p class="mt-1 text-2xl font-bold"><span class="text-brand">¾</span> + ¼</p>
+      </div>
+      <div
+        class="float-delayed absolute right-[8%] top-[14%] w-36 rotate-[10deg] rounded-2xl border-2 border-white/80 bg-white/75 p-3 shadow-lg backdrop-blur-sm"
+        style="--d: 1s"
+      >
+        <p class="text-[10px] font-bold uppercase tracking-wider text-brandDark/70">Formas</p>
+        <svg viewBox="0 0 80 70" class="mx-auto mt-1 h-14 w-20">
+          <polygon points="40,8 72,62 8,62" fill="none" stroke="#00CAFC" stroke-width="3" />
+        </svg>
+      </div>
+      <div
+        class="float-delayed absolute left-[10%] bottom-[20%] w-36 rotate-[8deg] rounded-2xl border-2 border-white/80 bg-white/75 p-3 shadow-lg backdrop-blur-sm"
+        style="--d: 0.6s"
+      >
+        <p class="text-[10px] font-bold uppercase tracking-wider text-brandDark/70">Mercado</p>
+        <p class="mt-1 text-3xl font-bold text-brand">45%</p>
+      </div>
+      <div
+        class="float-delayed absolute right-[10%] bottom-[22%] w-40 -rotate-6 rounded-2xl border-2 border-white/80 bg-white/75 p-3 shadow-lg backdrop-blur-sm"
+        style="--d: 1.4s"
+      >
+        <p class="text-[10px] font-bold uppercase tracking-wider text-brandDark/70">Potência</p>
+        <p class="mt-1 text-2xl font-bold"><span class="text-brand">2</span><sup class="text-brand">²</sup> = 4</p>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <main
+      class="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center px-4 text-center"
+    >
+      <div
+        class="float-slow mb-6 flex h-32 w-32 items-center justify-center rounded-[2rem] bg-white/90 p-4 shadow-xl ring-4 ring-brand/25"
+      >
+        <img src="/matmaker-logo.svg" alt="MatMaker" class="h-full w-full object-contain" />
+      </div>
+
+      <h1 class="max-w-2xl text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
+        Matemática que <span class="text-brand">flutua</span> na sua mente
+      </h1>
+      <p class="mt-4 max-w-lg text-lg font-medium text-brandDark/75">
+        Brinquedo digital de alta tecnologia no espaço — aprenda jogando no laboratório MatMaker.
+      </p>
+
+      <a
+        href="/dashboard"
+        class="mt-8 inline-flex min-h-14 items-center justify-center rounded-2xl bg-gradient-to-r from-brand to-[#00A1C9] px-12 py-4 text-xl font-bold text-white shadow-lg ring-4 ring-brand/25 transition-transform duration-300 hover:scale-105"
+      >
+        Começar a Jogar
+      </a>
+    </main>
+  </body>
+</html>

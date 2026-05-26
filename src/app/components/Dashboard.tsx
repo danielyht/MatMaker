@@ -1,5 +1,16 @@
 import { useNavigate } from 'react-router';
-import { ChevronLeft, Rocket, Cookie, Apple, Zap, Percent, ShoppingBag, Layers3 } from 'lucide-react';
+import {
+  ChevronLeft,
+  Rocket,
+  Cookie,
+  Apple,
+  Zap,
+  ShoppingBag,
+  Layers3,
+  Play,
+} from 'lucide-react';
+import { MathSymbolsBackground } from './MathSymbolsBackground';
+import { MatMakerLogo } from './MatMakerLogo';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -42,15 +53,6 @@ export function Dashboard() {
       rota: '/potencias-quadrado',
     },
     {
-      id: 5,
-      nome: 'Porcentagens',
-      descricao: 'Grade de 100 partes e percentagens.',
-      icone: Percent,
-      cor: '#0d9488',
-      bloqueado: false,
-      rota: '/percentagens',
-    },
-    {
       id: 6,
       nome: 'Desafio do mercado',
       descricao: '15 perguntas mistas, com centavos.',
@@ -70,86 +72,98 @@ export function Dashboard() {
     },
   ];
 
-  function clicarAtividade(atividade) {
+  function clicarAtividade(atividade: (typeof atividades)[number]) {
     if (!atividade.bloqueado && atividade.rota) {
       navegar(atividade.rota);
     }
   }
 
   return (
-    <div className="mx-auto min-h-[100dvh] max-w-7xl px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-8 md:px-8">
-      <button
-        type="button"
-        onClick={() => navegar('/')}
-        className="mb-5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-card text-foreground shadow-sm transition-colors hover:bg-muted sm:mb-6"
-        aria-label="Voltar ao início"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
+    <div className="relative min-h-[100dvh] overflow-x-hidden bg-[#EBF4FA] text-[#1E40AF]">
+      <MathSymbolsBackground opacity={0.04} />
 
-      <div className="mb-8 sm:mb-12">
-        <h1 className="text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
-          Olá, Construtor! 👋
-        </h1>
-        <p className="mt-1 text-base text-muted-foreground sm:mt-2 sm:text-lg">
-          Escolha uma atividade e comece a explorar o mundo da matemática
-        </p>
-      </div>
+      <div className="pointer-events-none absolute -left-16 top-1/4 h-56 w-56 rounded-full bg-[#00CAFC]/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-12 bottom-1/3 h-48 w-48 rounded-full bg-[#3498DB]/10 blur-3xl" />
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-5">
-        {atividades.map((atividade) => {
-          const Icone = atividade.icone;
-          const podeClicar = !atividade.bloqueado;
+      <div className="relative z-10 m-3 flex min-h-[calc(100dvh-1.5rem)] flex-col gap-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:m-4 sm:gap-4">
+        {/* Cabeçalho flutuante */}
+        <header className="glass-panel flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
+          <button
+            type="button"
+            onClick={() => navegar('/')}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/90 text-[#1E40AF] shadow-sm transition-transform hover:scale-105 active:scale-95"
+            aria-label="Voltar ao início"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/90 p-1.5 shadow-sm ring-2 ring-[#00CAFC]/25">
+            <MatMakerLogo className="h-full w-full" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold leading-tight sm:text-2xl md:text-3xl">
+              Laboratório MatMaker
+            </h1>
+            <p className="mt-0.5 text-sm font-medium text-[#1E40AF]/70 sm:text-base">
+              Escolha uma missão e comece a explorar
+            </p>
+          </div>
+        </header>
 
-          return (
-            <div
-              key={atividade.id}
-              onClick={() => clicarAtividade(atividade)}
-              className="rounded-3xl bg-white p-5 shadow-md transition-all duration-200 relative active:scale-[0.99] md:flex md:items-center md:gap-5 md:p-6 md:hover:shadow-xl"
-              style={{
-                cursor: podeClicar ? 'pointer' : 'not-allowed',
-                opacity: podeClicar ? 1 : 0.6,
-                transform: podeClicar ? 'scale(1)' : 'scale(1)',
-              }}
-              onMouseEnter={(e) => {
-                if (podeClicar && window.matchMedia('(hover: hover)').matches) {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (podeClicar) e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-md md:mb-0 md:flex-shrink-0"
-                style={{ backgroundColor: atividade.cor }}
-              >
-                <Icone className="w-8 h-8 text-white" strokeWidth={2.5} />
-              </div>
+        {/* Lista de atividades */}
+        <div className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-4 md:p-5">
+          <p className="mb-3 px-1 text-sm font-semibold text-[#1E40AF]/80 sm:mb-4">
+            Missões disponíveis
+          </p>
+          <div className="flex-1 space-y-3 overflow-y-auto pr-0.5 sm:space-y-4">
+            {atividades.map((atividade) => {
+              const Icone = atividade.icone;
+              const podeClicar = !atividade.bloqueado;
 
-              <div className="md:flex md:items-center md:justify-between md:gap-4 md:flex-1">
-                <div className="pr-10 md:pr-0">
-                  <h3 className="text-lg font-bold text-foreground sm:text-xl mb-1 sm:mb-2">
-                    {atividade.nome}
-                  </h3>
-
-                  <p className="text-sm leading-snug text-muted-foreground md:mb-0">
-                    {atividade.descricao}
-                  </p>
-                </div>
-
-                {!atividade.bloqueado && (
-                  <button
-                    type="button"
-                    className="mt-4 min-h-11 w-full touch-manipulation rounded-2xl bg-gray-100 py-3 text-sm font-semibold text-foreground transition-colors active:bg-gray-300 md:mt-0 md:w-36 md:text-base md:hover:bg-gray-200"
+              return (
+                <article
+                  key={atividade.id}
+                  onClick={() => clicarAtividade(atividade)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') clicarAtividade(atividade);
+                  }}
+                  role="button"
+                  tabIndex={podeClicar ? 0 : -1}
+                  className={`stage-panel flex flex-col gap-4 p-4 transition-all duration-200 sm:flex-row sm:items-center sm:gap-5 sm:p-5 ${
+                    podeClicar
+                      ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-12px_rgba(52,152,219,0.28)] active:scale-[0.99]'
+                      : 'cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  <div
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-md sm:h-16 sm:w-16"
+                    style={{ backgroundColor: atividade.cor }}
                   >
-                    Jogar
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                    <Icone className="h-7 w-7 text-white sm:h-8 sm:w-8" strokeWidth={2.5} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-bold sm:text-xl">{atividade.nome}</h3>
+                    <p className="mt-1 text-sm leading-snug text-[#1E40AF]/70">{atividade.descricao}</p>
+                  </div>
+
+                  {podeClicar && (
+                    <button
+                      type="button"
+                      className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#3498DB] px-5 py-3 text-sm font-bold text-white shadow-md shadow-[#3498DB]/30 transition-transform hover:scale-105 active:scale-[0.98] sm:w-auto sm:min-w-[8.5rem]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clicarAtividade(atividade);
+                      }}
+                    >
+                      <Play className="h-4 w-4 fill-current" />
+                      Jogar
+                    </button>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

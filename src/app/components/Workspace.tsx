@@ -1,11 +1,50 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { ChevronLeft, AlertCircle, Eraser, Shapes } from 'lucide-react';
+import { ChevronLeft, Eraser, Shapes } from 'lucide-react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { MathSymbolsBackground } from './MathSymbolsBackground';
+import {
+  COR_PRIMARIA,
+  COR_SUCESSO,
+  SEGMENTO_GLOW,
+  VERTICE_RAIO,
+  VERTICE_ROTACIONADOR,
+} from '../constants/matmakerBrand';
 
 // ESCALA: 1cm = 20 pixels
 const ESCALA = 20;
+
+/** Estilo visual do segmento (equivalente Konva: criarSegmento + shadowBlur/shadowColor). */
+function criarSegmento(
+  segmento: { cor: string },
+  ponta1Grudada: boolean,
+  ponta2Grudada: boolean,
+) {
+  const emSnap = Boolean(ponta1Grudada || ponta2Grudada);
+  return {
+    stroke: emSnap ? COR_SUCESSO : segmento.cor,
+    fill: emSnap ? COR_SUCESSO : segmento.cor,
+    shadowBlur: SEGMENTO_GLOW.shadowBlur,
+    shadowColor: SEGMENTO_GLOW.shadowColor,
+  };
+}
+
+/** Cor do vértice: pivô (azul) vs rotacionador (laranja); snap = laranja. */
+function corVertice(
+  ponta: 'ponta1' | 'ponta2',
+  arrastando: string | null,
+  grudada: boolean,
+) {
+  if (grudada) return COR_SUCESSO;
+  if (arrastando === 'ponta1') {
+    return ponta === 'ponta1' ? VERTICE_ROTACIONADOR : VERTICE_PIVO;
+  }
+  if (arrastando === 'ponta2') {
+    return ponta === 'ponta2' ? VERTICE_ROTACIONADOR : VERTICE_PIVO;
+  }
+  return ponta === 'ponta1' ? VERTICE_PIVO : VERTICE_ROTACIONADOR;
+}
 
 // Configurações dos diferentes tipos de triângulos (apenas para referência educativa)
 const TRIANGULOS = {
@@ -96,7 +135,7 @@ function PecaArrastavel({ segmento, index }) {
   return (
     <div
       ref={refArrastar}
-      className="bg-gray-50 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-move"
+      className="cursor-move rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm transition-all hover:shadow-md"
       style={{
         opacity: estaArrastando ? 0.5 : 1,
       }}
@@ -263,6 +302,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
   // Verificar se as pontas estão grudadas em outras retas
   const ponta1Grudada = encontrarPontasProximas(x1, y1, 5);
   const ponta2Grudada = encontrarPontasProximas(x2, y2, 5);
+  const visual = criarSegmento(segmento, Boolean(ponta1Grudada), Boolean(ponta2Grudada));
 
   // Calcular tamanho atual em cm
   const tamanhoAtualPixels = calcularDistancia(x1, y1, x2, y2);
@@ -294,16 +334,17 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
         onMouseDown={iniciarArrasteCorpo}
       />
       
-      {/* Linha visível colorida */}
+      {/* Linha visível — brilho tecnológico (shadowBlur / shadowColor do Konva) */}
       <line
         x1={x1}
         y1={y1}
         x2={x2}
         y2={y2}
-        stroke={segmento.cor}
+        stroke={visual.stroke}
         strokeWidth="8"
         strokeLinecap="round"
-        style={{ 
+        filter="url(#segmento-glow)"
+        style={{
           pointerEvents: 'none',
           userSelect: 'none',
         }}
@@ -317,7 +358,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
           width="50"
           height="20"
           fill="white"
-          stroke={segmento.cor}
+          stroke={visual.stroke}
           strokeWidth="2"
           rx="6"
           style={{ pointerEvents: 'none' }}
@@ -327,7 +368,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
           y="0"
           textAnchor="middle"
           fontSize="12"
-          fill={segmento.cor}
+          fill={visual.stroke}
           fontWeight="bold"
           style={{ pointerEvents: 'none', userSelect: 'none' }}
         >
@@ -339,7 +380,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
       <circle
         cx={x1}
         cy={y1}
-        r="12"
+        r={VERTICE_RAIO + 2}
         fill="transparent"
         style={{ 
           cursor: arrastando === 'ponta1' ? 'grabbing' : 'pointer',
@@ -351,21 +392,20 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
         onMouseLeave={() => setHoverPonta(null)}
       />
 
-      {/* Círculo visível colorido - Ponta 1 */}
+      {/* Círculo visível — pivô (azul) / rotacionador (laranja) / snap (laranja) */}
       <circle
         cx={x1}
         cy={y1}
-        r={hoverPonta === 'ponta1' || arrastando === 'ponta1' ? '12' : '9'}
-        fill={ponta1Grudada ? '#10b981' : segmento.cor}
+        r={VERTICE_RAIO}
+        fill={corVertice('ponta1', arrastando, Boolean(ponta1Grudada))}
         stroke="white"
         strokeWidth="3"
-        style={{ 
+        style={{
           pointerEvents: 'none',
           userSelect: 'none',
-          transition: 'r 0.2s ease',
         }}
       />
-      
+
       {/* Indicador de rotação - Ponta 1 */}
       {(hoverPonta === 'ponta1' || arrastando === 'ponta1') && (
         <circle
@@ -373,7 +413,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
           cy={y1}
           r="18"
           fill="none"
-          stroke={segmento.cor}
+          stroke={VERTICE_ROTACIONADOR}
           strokeWidth="2"
           strokeDasharray="3 3"
           opacity="0.6"
@@ -385,7 +425,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
       <circle
         cx={x2}
         cy={y2}
-        r="12"
+        r={VERTICE_RAIO + 2}
         fill="transparent"
         style={{ 
           cursor: arrastando === 'ponta2' ? 'grabbing' : 'pointer',
@@ -397,21 +437,20 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
         onMouseLeave={() => setHoverPonta(null)}
       />
 
-      {/* Círculo visível colorido - Ponta 2 */}
+      {/* Círculo visível — pivô (azul) / rotacionador (laranja) / snap (laranja) */}
       <circle
         cx={x2}
         cy={y2}
-        r={hoverPonta === 'ponta2' || arrastando === 'ponta2' ? '12' : '9'}
-        fill={ponta2Grudada ? '#10b981' : segmento.cor}
+        r={VERTICE_RAIO}
+        fill={corVertice('ponta2', arrastando, Boolean(ponta2Grudada))}
         stroke="white"
         strokeWidth="3"
-        style={{ 
+        style={{
           pointerEvents: 'none',
           userSelect: 'none',
-          transition: 'r 0.2s ease',
         }}
       />
-      
+
       {/* Indicador de rotação - Ponta 2 */}
       {(hoverPonta === 'ponta2' || arrastando === 'ponta2') && (
         <circle
@@ -419,7 +458,7 @@ function SegmentoNoCanvas({ segmento, indice, aoAtualizar, aoRemover, todasAsRet
           cy={y2}
           r="18"
           fill="none"
-          stroke={segmento.cor}
+          stroke={VERTICE_ROTACIONADOR}
           strokeWidth="2"
           strokeDasharray="3 3"
           opacity="0.6"
@@ -532,18 +571,36 @@ function CanvasInterativo({ segmentosNoCanvas, setSegmentosNoCanvas, tipoAtual }
   return (
     <div
       ref={refSoltar}
-      className="w-full h-full bg-white rounded-3xl shadow-inner relative select-none"
+      className="relative h-full min-h-[280px] w-full select-none rounded-2xl"
       style={{
         backgroundImage:
-          'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.03) 19px, rgba(0,0,0,0.03) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.03) 19px, rgba(0,0,0,0.03) 20px)',
-        backgroundColor: estaAcimaDaArea ? 'rgba(79, 195, 247, 0.05)' : 'white',
+          'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(52,152,219,0.06) 19px, rgba(52,152,219,0.06) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(52,152,219,0.06) 19px, rgba(52,152,219,0.06) 20px)',
+        backgroundColor: estaAcimaDaArea ? 'rgba(52, 152, 219, 0.08)' : 'transparent',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
         msUserSelect: 'none',
       }}
     >
-      <svg id="canvas-svg" className="absolute inset-0 w-full h-full select-none" style={{ userSelect: 'none' }}>
+      <svg id="canvas-svg" className="absolute inset-0 h-full w-full select-none" style={{ userSelect: 'none' }}>
+        <defs>
+          <filter
+            id="segmento-glow"
+            x="-40%"
+            y="-40%"
+            width="180%"
+            height="180%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feDropShadow
+              dx="0"
+              dy="0"
+              stdDeviation={SEGMENTO_GLOW.shadowBlur * 0.45}
+              floodColor={SEGMENTO_GLOW.shadowColor}
+              floodOpacity="0.85"
+            />
+          </filter>
+        </defs>
         {segmentosNoCanvas.map((seg, index) => (
           <SegmentoNoCanvas
             key={seg.id}
@@ -560,14 +617,17 @@ function CanvasInterativo({ segmentosNoCanvas, setSegmentosNoCanvas, tipoAtual }
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <p className="text-4xl mb-3">{config.emoji}</p>
-            <p className="text-lg text-gray-400">Arraste as retas aqui</p>
-            <p className="text-sm text-gray-400 mt-2">Construa triângulos!</p>
+            <p className="text-lg text-[#1E40AF]/50">Arraste as retas aqui</p>
+            <p className="mt-2 text-sm text-[#1E40AF]/45">Construa triângulos!</p>
           </div>
         </div>
       )}
 
       {trianguloCompleto && (
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-8 py-4 rounded-3xl shadow-2xl animate-bounce z-10">
+        <div
+          className="absolute left-1/2 top-6 z-10 -translate-x-1/2 animate-bounce rounded-3xl px-8 py-4 text-white shadow-2xl"
+          style={{ backgroundColor: COR_SUCESSO, boxShadow: `0 12px 40px -6px ${COR_SUCESSO}99` }}
+        >
           <div className="flex items-center gap-3">
             <span className="text-3xl">🎉</span>
             <div>
@@ -644,92 +704,97 @@ function WorkspaceConteudo() {
   const analise = analisarTriangulo();
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      <div className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
-        <button
-          onClick={voltarDashboard}
-          className="w-10 h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors"
-        >
-          <ChevronLeft className="w-6 h-6 text-foreground" />
-        </button>
-        <Shapes className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold text-foreground">
-          Laboratório de Triângulos
-        </h2>
-      </div>
+    <div className="relative min-h-[100dvh] overflow-hidden bg-background text-foreground">
+      <MathSymbolsBackground opacity={0.04} />
 
-      {/* Seletor de Tipo de Desafio */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 overflow-x-auto">
-        <div className="flex gap-2">
-          {Object.entries(TRIANGULOS).map(([tipo, config]) => (
-            <button
-              key={tipo}
-              onClick={() => trocarTipo(tipo)}
-              className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all whitespace-nowrap ${
-                tipoTriangulo === tipo
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-gray-100 text-foreground hover:bg-gray-200'
-              }`}
-            >
-              <span className="mr-2">{config.emoji}</span>
-              {config.nome}
-              <span className="ml-2 text-xs opacity-75">({config.descricao})</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <div className="relative z-10 m-3 flex h-[calc(100dvh-1.5rem)] min-h-0 flex-col gap-3 pb-[env(safe-area-inset-bottom)] pt-[max(0.75rem,env(safe-area-inset-top))] sm:m-4">
+        {/* Cabeçalho */}
+        <header className="glass-panel flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5">
+          <button
+            type="button"
+            onClick={voltarDashboard}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/90 transition-transform hover:scale-105 active:scale-95"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <Shapes className="h-6 w-6 shrink-0 text-action" />
+          <h2 className="min-w-0 text-lg font-bold sm:text-xl md:text-2xl">Laboratório de Triângulos</h2>
+        </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <aside className="w-64 bg-white p-6 shadow-md overflow-y-auto">
-          <h3 className="text-lg font-bold text-foreground mb-2">
-            Caixa de Retas
-          </h3>
-          <p className="text-xs text-muted-foreground mb-4">
-            {configAtual.descricao}
-          </p>
-          
-          <div className="space-y-4">
-            {configAtual.retas.map((seg, index) => (
-              <PecaArrastavel key={index} segmento={seg} index={index} />
+        {/* Barra de ferramentas — tipos de desafio */}
+        <div className="glass-panel shrink-0 overflow-x-auto px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className="flex gap-2">
+            {Object.entries(TRIANGULOS).map(([tipo, config]) => (
+              <button
+                key={tipo}
+                type="button"
+                onClick={() => trocarTipo(tipo)}
+                className={`whitespace-nowrap rounded-2xl px-4 py-2 text-sm font-semibold transition-all ${
+                  tipoTriangulo === tipo
+                    ? 'bg-action text-white shadow-md shadow-action/30'
+                    : 'bg-white/60 text-foreground hover:bg-white/90'
+                }`}
+              >
+                <span className="mr-2">{config.emoji}</span>
+                {config.nome}
+                <span className="ml-2 text-xs opacity-75">({config.descricao})</span>
+              </button>
             ))}
           </div>
+        </div>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-2xl border-2 border-blue-200">
-            <p className="text-sm text-foreground mb-2">
-              💡 <strong>Como usar:</strong>
-            </p>
-            <ul className="text-xs text-foreground/80 space-y-1">
-              <li>chandle️ Clique na <strong>linha</strong> = mover</li>
-              <li>⚫ Clique nas <strong>bolinhas</strong> = rotacionar</li>
-              <li>💚 <strong>Verde</strong> = conectado!</li>
-            </ul>
-          </div>
-        </aside>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden lg:flex-row">
+          {/* Menu lateral — caixa de retas */}
+          <aside className="glass-panel flex max-h-[38vh] w-full shrink-0 flex-col overflow-hidden p-4 sm:p-5 lg:max-h-none lg:w-60 xl:w-64">
+            <h3 className="mb-1 text-lg font-bold">Caixa de Retas</h3>
+            <p className="mb-4 text-xs text-[#1E40AF]/70">{configAtual.descricao}</p>
 
-        <main className="flex-1 p-8 overflow-auto">
-          <CanvasInterativo
-            segmentosNoCanvas={segmentosNoCanvas}
-            setSegmentosNoCanvas={setSegmentosNoCanvas}
-            tipoAtual={tipoTriangulo}
-          />
-        </main>
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-0.5">
+              {configAtual.retas.map((seg, index) => (
+                <PecaArrastavel key={index} segmento={seg} index={index} />
+              ))}
+            </div>
 
-        <aside className="w-80 bg-[#ffedd5] p-6 shadow-md overflow-y-auto">
-          <div className="flex items-start gap-3 mb-6">
-            <div className="w-12 h-12 bg-[#ffb347] rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
+            <div className="mt-4 shrink-0 rounded-2xl border border-action/25 bg-action/10 p-3">
+              <p className="mb-2 text-sm font-bold">💡 Como usar</p>
+              <ul className="space-y-1 text-xs text-[#1E40AF]/85">
+                <li>
+                  Clique na <strong>linha</strong> = mover
+                </li>
+                <li>
+                  Clique nas <strong>bolinhas</strong> = rotacionar
+                </li>
+                <li>
+                  <strong className="text-success">Laranja</strong> = conectado!
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          {/* Palco central */}
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="stage-panel flex min-h-[min(52vh,520px)] flex-1 flex-col p-2 sm:p-3 lg:min-h-0">
+              <CanvasInterativo
+                segmentosNoCanvas={segmentosNoCanvas}
+                setSegmentosNoCanvas={setSegmentosNoCanvas}
+                tipoAtual={tipoTriangulo}
+              />
+            </div>
+          </main>
+
+          {/* Painel de instruções */}
+          <aside className="glass-panel flex max-h-[42vh] w-full shrink-0 flex-col overflow-y-auto p-4 sm:p-5 lg:max-h-none lg:w-72 xl:w-80">
+          <div className="mb-5 flex items-start gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-success/20 text-2xl">
               {configAtual.emoji}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground mb-1">
-                Desafio: {configAtual.nome}
-              </h3>
-              <p className="text-sm text-foreground/80">
-                {configAtual.descricao}
-              </p>
+              <h3 className="mb-1 text-lg font-bold">Desafio: {configAtual.nome}</h3>
+              <p className="text-sm text-[#1E40AF]/75">{configAtual.descricao}</p>
             </div>
           </div>
 
-          <div className="bg-white/70 rounded-2xl p-4 mb-4">
+          <div className="mb-4 rounded-2xl border border-white/60 bg-white/50 p-4">
             <p className="text-sm text-foreground leading-relaxed mb-3">
               <strong>📚 Sobre triângulos:</strong>
             </p>
@@ -741,10 +806,10 @@ function WorkspaceConteudo() {
             </ul>
           </div>
 
-          <div className="bg-white/70 rounded-2xl p-4 mb-4">
-            <div className="flex justify-between items-center mb-3">
+          <div className="mb-4 rounded-2xl border border-white/60 bg-white/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-semibold">Retas conectadas:</span>
-              <span className="text-lg font-bold text-primary">{segmentosNoCanvas.length}</span>
+              <span className="text-lg font-bold text-action">{segmentosNoCanvas.length}</span>
             </div>
             
             {analise && (
@@ -772,7 +837,7 @@ function WorkspaceConteudo() {
                   {analise.regras.map((regra, i) => (
                     <div key={i} className="flex items-center justify-between text-xs">
                       <span className="text-foreground font-mono">{regra.expressao} cm</span>
-                      <span className={regra.valida ? 'text-green-600' : 'text-red-600'}>
+                      <span className={regra.valida ? 'text-success' : 'text-red-600'}>
                         {regra.valida ? '✓' : '✗'}
                       </span>
                     </div>
@@ -791,11 +856,11 @@ function WorkspaceConteudo() {
                 )}
                 
                 {analise.valido && (
-                  <div className="mt-3 p-2 bg-green-100 border border-green-300 rounded-xl">
-                    <p className="text-xs text-green-700 font-semibold">
+                  <div className="mt-3 rounded-xl border border-success/40 bg-success/15 p-2">
+                    <p className="text-xs font-semibold text-success">
                       ✓ Triângulo {analise.tipo} válido!
                     </p>
-                    <p className="text-xs text-green-600 mt-1">
+                    <p className="mt-1 text-xs text-[#1E40AF]/80">
                       Parabéns! Você criou um triângulo que existe! 🎉
                     </p>
                   </div>
@@ -804,23 +869,25 @@ function WorkspaceConteudo() {
             )}
 
             {segmentosNoCanvas.length < 3 && (
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                <p className="text-xs text-blue-700">
+              <div className="mt-3 rounded-xl border border-action/30 bg-action/10 p-3">
+                <p className="text-xs text-[#1E40AF]/85">
                   💡 Arraste 3 retas e conecte as pontas para formar um triângulo!
                 </p>
               </div>
             )}
           </div>
 
-          <button 
+          <button
+            type="button"
             onClick={limparTela}
             disabled={segmentosNoCanvas.length === 0}
-            className="w-full bg-red-500 text-white py-4 rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-auto flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500 py-3.5 text-white shadow-md transition-all hover:bg-red-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Eraser className="w-5 h-5" />
+            <Eraser className="h-5 w-5" />
             Limpar Tela
           </button>
         </aside>
+        </div>
       </div>
     </div>
   );

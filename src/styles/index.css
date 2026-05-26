@@ -1,3 +1,50 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/** Flutuação suave — landing zero gravidade (símbolos e cards decorativos). */
+@keyframes zero-gravity-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.zero-gravity-float {
+  animation: zero-gravity-float 7s ease-in-out infinite;
+}
+
+.zero-gravity-float-slow {
+  animation: zero-gravity-float 10s ease-in-out infinite;
+}
+
+.zero-gravity-float-delayed {
+  animation: zero-gravity-float 8.5s ease-in-out infinite;
+  animation-delay: var(--zg-delay, 0s);
+}
+
+/** Painéis flutuantes com vidro — dashboard / laboratório */
+@layer utilities {
+  .glass-panel {
+    border-radius: 1.5rem;
+    border: 1px solid rgb(255 255 255 / 0.65);
+    background: rgb(255 255 255 / 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 8px 32px -8px rgb(52 152 219 / 0.18),
+      0 2px 8px rgb(30 64 175 / 0.06);
+  }
+
+  .stage-panel {
+    border-radius: 1.5rem;
+    border: 1px solid rgb(255 255 255 / 0.9);
+    background: rgb(255 255 255 / 0.92);
+    box-shadow:
+      0 16px 48px -12px rgb(52 152 219 / 0.22),
+      0 4px 16px rgb(30 64 175 / 0.08);
+  }
+}
