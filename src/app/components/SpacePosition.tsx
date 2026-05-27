@@ -311,6 +311,7 @@ export function SpacePosition() {
   const [navesAcertadas, setNavesAcertadas] = useState([]);
   const [navesErradas, setNavesErradas] = useState([]); // Rastrear erros
   const [estadoJogo, setEstadoJogo] = useState('jogando'); // 'jogando', 'vitoria', 'derrota'
+  const [mensagemReforco, setMensagemReforco] = useState(false);
 
   // Inicializar naves quando o jogo começar
   useEffect(() => {
@@ -318,6 +319,40 @@ export function SpacePosition() {
       gerarNaves();
     }
   }, [jogoIniciado]);
+
+  /** Reativa naves destruídas por erro; mantém as já acertadas na ordem das dicas e garante naves nos dois lados. */
+  useEffect(() => {
+    if (estadoJogo !== 'jogando' || !jogoIniciado || naves.length === 0) return;
+    if (balasRestantes === 0 || navesAcertadas.length >= INVASAO_NAVES_ALVO) return;
+
+    const acertadas = new Set(navesAcertadas);
+    const navesAtivas = naves.filter((n) => !n.destruida);
+    const alvoId = navesReaisOrdenadas[dicaAtual]?.id;
+    const alvoNav = naves.find((n) => n.id === alvoId);
+    const alvoIndisponivel = Boolean(alvoNav?.destruida);
+    const ativasEsquerda = navesAtivas.filter((n) => n.posicao === 'esquerda');
+    const ativasDireita = navesAtivas.filter((n) => n.posicao === 'direita');
+    const ladoVazio = ativasEsquerda.length === 0 || ativasDireita.length === 0;
+    const precisaRegenerar = navesAtivas.length === 0 || ladoVazio || alvoIndisponivel;
+
+    if (!precisaRegenerar) return;
+
+    const temOQueRegenerar = naves.some((n) => n.destruida && !acertadas.has(n.id));
+    if (!temOQueRegenerar) return;
+
+    setNaves((prev) =>
+      prev.map((n) =>
+        n.destruida && !acertadas.has(n.id) ? { ...n, destruida: false } : n,
+      ),
+    );
+    setMensagemReforco(true);
+  }, [naves, balasRestantes, estadoJogo, dicaAtual, navesAcertadas, navesReaisOrdenadas, jogoIniciado]);
+
+  useEffect(() => {
+    if (!mensagemReforco) return;
+    const timer = setTimeout(() => setMensagemReforco(false), 3500);
+    return () => clearTimeout(timer);
+  }, [mensagemReforco]);
 
   function gerarNaves() {
     const novasNaves = [];
@@ -400,10 +435,9 @@ export function SpacePosition() {
     // Embaralhar ordem final das naves
     setNaves(novasNaves.sort(() => Math.random() - 0.5));
 
-    // Ordenar as naves reais para as dicas (da esquerda para direita)
-    const navesReaisLista = novasNaves.filter(n => n.tipo === 'real');
-    const navesOrdenadas = navesReaisLista.sort((a, b) => a.x - b.x);
-    setNavesReaisOrdenadas(navesOrdenadas);
+    // Ordem das dicas: aleatória (esquerda e direita podem repetir em sequência)
+    const navesReaisLista = novasNaves.filter((n) => n.tipo === 'real');
+    setNavesReaisOrdenadas(embaralhar(navesReaisLista));
   }
 
   function clicarNave(nave) {
@@ -430,7 +464,10 @@ export function SpacePosition() {
     } else {
       setNavesErradas((prev) => [...prev, nave.id]);
 
-      setNaves((prev) => prev.map((n) => (n.id === nave.id ? { ...n, destruida: true } : n)));
+      // Hologramas permanecem no mapa; só naves reais erradas somem
+      if (nave.tipo === 'real') {
+        setNaves((prev) => prev.map((n) => (n.id === nave.id ? { ...n, destruida: true } : n)));
+      }
 
       if (novoBalasRestantes === 0) {
         setEstadoJogo('derrota');
@@ -445,6 +482,7 @@ export function SpacePosition() {
     setNavesAcertadas([]);
     setNavesErradas([]); // Limpar erros
     setEstadoJogo('jogando');
+    setMensagemReforco(false);
     gerarNaves();
   }
 
@@ -662,6 +700,12 @@ export function SpacePosition() {
                 <p className="text-xs text-cyan-200 sm:text-sm">Seu copiloto</p>
               </div>
             </div>
+
+            {mensagemReforco && estadoJogo === 'jogando' && (
+              <div className="mb-3 rounded-xl border border-cyan-300/50 bg-cyan-500/20 px-3 py-2 text-center text-xs font-semibold text-cyan-100 sm:text-sm">
+                📡 Enzo: &quot;Reforço alienígena detectado — novas naves no radar!&quot;
+              </div>
+            )}
 
             {/* Dica Atual */}
             {estadoJogo === 'jogando' && naveAlvo && (

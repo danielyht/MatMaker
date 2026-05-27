@@ -28,7 +28,7 @@ export function Dashboard() {
     {
       id: 2,
       nome: 'Aventura das Frações',
-      descricao: 'Aprenda frações dividindo chocolates, pizzas e muito mais!',
+      descricao: 'Aprenda frações dividindo pizzas!',
       icone: Cookie,
       cor: '#fb923c',
       bloqueado: false,
@@ -37,7 +37,7 @@ export function Dashboard() {
     {
       id: 3,
       nome: 'Multiplicação no mercado',
-      descricao: 'Marque maçãs e resolva problemas de multiplicação no mercado',
+      descricao: 'Resolva problemas de multiplicação no mercado.',
       icone: Apple,
       cor: '#22c55e',
       bloqueado: false,
@@ -55,7 +55,7 @@ export function Dashboard() {
     {
       id: 6,
       nome: 'Desafio do mercado',
-      descricao: '15 perguntas mistas, com centavos.',
+      descricao: 'Você aceita esse desafio?',
       icone: ShoppingBag,
       cor: '#059669',
       bloqueado: false,
@@ -96,9 +96,7 @@ export function Dashboard() {
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/90 p-1.5 shadow-sm ring-2 ring-[#00CAFC]/25">
-            <MatMakerLogo className="h-full w-full" />
-          </div>
+          <MatMakerLogo className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold leading-tight sm:text-2xl md:text-3xl">
               Laboratório MatMaker
