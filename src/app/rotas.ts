@@ -8,11 +8,16 @@ import { SquarePowerGame } from './components/SquarePowerGame';
 import { MarketChallengeGame } from './components/MarketChallengeGame';
 import { MaterialDouradoGame } from './components/MaterialDouradoGame';
 import { SobrePlaceholderPage } from './components/SobrePlaceholderPage';
+import { Cadastro } from './components/Cadastro';
 
 export const roteador = createBrowserRouter([
   {
     path: '/',
     Component: LandingPage,
+  },
+  {
+    path: '/cadastro',
+    Component: Cadastro,
   },
   {
     path: '/dashboard',

@@ -107,6 +107,12 @@ export function LandingPage() {
             Laboratório
           </Link>
           <Link
+            to="/cadastro"
+            className="rounded-full px-3 py-1.5 text-[#1E40AF]/80 transition-colors hover:bg-white/50 sm:px-4"
+          >
+            Cadastro
+          </Link>
+          <Link
             to="/sobre"
             className="rounded-full px-3 py-1.5 text-[#1E40AF]/80 transition-colors hover:bg-white/50 sm:px-4"
           >
