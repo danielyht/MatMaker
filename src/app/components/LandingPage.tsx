@@ -101,10 +101,10 @@ export function LandingPage() {
         </Link>
         <nav className="flex items-center gap-2 text-sm font-semibold sm:gap-4 sm:text-base">
           <Link
-            to="/dashboard"
+            to="/login"
             className="rounded-full px-3 py-1.5 text-primary transition-colors hover:bg-primary/10 sm:px-4"
           >
-            Laboratório
+            Entrar
           </Link>
           <Link
             to="/cadastro"
@@ -149,7 +149,7 @@ export function LandingPage() {
         </p>
 
         <Link
-          to="/dashboard"
+          to="/login"
           className="mt-8 inline-flex min-h-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-[#00A1C9] px-10 py-4 text-lg font-bold text-white shadow-[0_14px_40px_-6px_rgba(0,202,252,0.55)] transition-transform duration-300 hover:scale-105 active:scale-[0.98] sm:min-h-[3.75rem] sm:px-12 sm:text-xl"
         >
           Ir para o laboratório

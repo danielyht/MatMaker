@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AuthApiError } from '@supabase/supabase-js';
+import { traduzirErroAuth } from '../../lib/traduzirErroAuth';
 import { MatMakerLogo } from './MatMakerLogo';
 import { MathSymbolsBackground } from './MathSymbolsBackground';
 import { COR_FUNDO_SISTEMA, COR_SUCESSO } from '../constants/matmakerBrand';
@@ -8,25 +9,6 @@ import { supabase, supabaseConfigurado } from '../../lib/supabaseClient';
 
 const BUCKET_AVATARES = 'avatares';
 const MAX_FOTO_BYTES = 2 * 1024 * 1024;
-
-function traduzirErroAuth(erro: AuthApiError): string {
-  const msg = erro.message.toLowerCase();
-
-  if (msg.includes('already registered') || msg.includes('already been registered')) {
-    return 'Este e-mail já está cadastrado. Tente fazer login ou use outro e-mail.';
-  }
-  if (msg.includes('password') && (msg.includes('short') || msg.includes('least'))) {
-    return 'A senha é fraca. Use pelo menos 6 caracteres.';
-  }
-  if (msg.includes('invalid') && msg.includes('email')) {
-    return 'Informe um e-mail válido.';
-  }
-  if (msg.includes('signup') && msg.includes('disabled')) {
-    return 'Cadastros estão desativados no momento. Entre em contato com o suporte.';
-  }
-
-  return erro.message || 'Não foi possível criar a conta. Tente novamente.';
-}
 
 function extensaoDeArquivo(nome: string): string {
   const partes = nome.split('.');
@@ -114,7 +96,7 @@ export function Cadastro() {
       if (authError) {
         const texto =
           authError instanceof AuthApiError
-            ? traduzirErroAuth(authError)
+            ? traduzirErroAuth(authError, 'cadastro')
             : authError.message;
         setMensagem({ tipo: 'erro', texto });
         return;
@@ -160,6 +142,8 @@ export function Cadastro() {
         nome: nomeTrim,
         email: emailTrim,
         foto_url: fotoUrl,
+        pontos: 0,
+        jogos_completados: 0,
       });
 
       if (perfilError) {
@@ -326,8 +310,8 @@ export function Cadastro() {
 
           <p className="mt-6 text-center text-sm text-[#1E40AF]/70">
             Já tem conta?{' '}
-            <Link to="/dashboard" className="font-semibold text-primary hover:underline">
-              Ir ao laboratório
+            <Link to="/login" className="font-semibold text-primary hover:underline">
+              Entrar
             </Link>
           </p>
         </div>

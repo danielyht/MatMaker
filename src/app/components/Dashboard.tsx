@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { LogOut } from 'lucide-react';
 import {
   ChevronLeft,
   Rocket,
@@ -8,12 +10,21 @@ import {
   ShoppingBag,
   Layers3,
   Play,
+  Trophy,
 } from 'lucide-react';
 import { MathSymbolsBackground } from './MathSymbolsBackground';
 import { MatMakerLogo } from './MatMakerLogo';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Dashboard() {
   const navegar = useNavigate();
+  const { perfil, sair, autenticado, carregando } = useAuth();
+
+  useEffect(() => {
+    if (!carregando && !autenticado) {
+      navegar('/login', { replace: true, state: { from: '/dashboard' } });
+    }
+  }, [autenticado, carregando, navegar]);
 
   const atividades = [
     {
@@ -72,6 +83,10 @@ export function Dashboard() {
     },
   ];
 
+  if (carregando || !autenticado) {
+    return null;
+  }
+
   function clicarAtividade(atividade: (typeof atividades)[number]) {
     if (!atividade.bloqueado && atividade.rota) {
       navegar(atividade.rota);
@@ -102,10 +117,49 @@ export function Dashboard() {
               Laboratório MatMaker
             </h1>
             <p className="mt-0.5 text-sm font-medium text-[#1E40AF]/70 sm:text-base">
-              Escolha uma missão e comece a explorar
+              {perfil?.nome
+                ? `Olá, ${perfil.nome.split(' ')[0]}! Escolha uma missão.`
+                : 'Escolha uma missão e comece a explorar'}
             </p>
           </div>
+          {perfil?.foto_url ? (
+            <img
+              src={perfil.foto_url}
+              alt=""
+              className="h-10 w-10 shrink-0 rounded-full border-2 border-white object-cover shadow-sm sm:h-11 sm:w-11"
+            />
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              void sair().then(() => navegar('/login'));
+            }}
+            className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-white/80 bg-white/90 px-3 text-sm font-semibold text-[#1E40AF] shadow-sm transition-transform hover:scale-105 active:scale-95"
+            aria-label="Sair da conta"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Sair</span>
+          </button>
         </header>
+
+        <button
+          type="button"
+          onClick={() => navegar('/ranking')}
+          className="stage-panel flex w-full items-center gap-4 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-12px_rgba(255,140,0,0.25)] active:scale-[0.99] sm:p-5"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF8C00] to-[#3498DB] shadow-md sm:h-16 sm:w-16">
+            <Trophy className="h-7 w-7 text-white sm:h-8 sm:w-8" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-bold sm:text-xl">Ranking</h3>
+            <p className="mt-1 text-sm text-[#1E40AF]/70">
+              Veja quem está na frente — {perfil?.pontos ?? 0} pts seus
+            </p>
+          </div>
+          <span className="shrink-0 rounded-2xl bg-[#FF8C00] px-4 py-2 text-sm font-bold text-white shadow-md">
+            Ver
+          </span>
+        </button>
 
         {/* Lista de atividades */}
         <div className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-4 md:p-5">
