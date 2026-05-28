@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Rocket, Target, Zap, Heart, Crosshair } from 'lucide-react';
+import { usePontosMissao } from '../hooks/usePontosMissao';
 
 /** Quantidade de naves reais a eliminar (dicas em sequência) e balas disponíveis. */
 const INVASAO_NAVES_ALVO = 15;
+const PONTOS_VITORIA = 100;
 const INVASAO_BALAS_INICIAIS = 24;
 
 /**
@@ -302,6 +304,8 @@ function ModalDerrota({ aoRepetir, aoVoltar, acertos, erros }) {
 
 export function SpacePosition() {
   const navegar = useNavigate();
+  const { ganharPontos, concluirMissao } = usePontosMissao();
+  const premioVitoriaRef = useRef(false);
   const [mostrarConvocamento, setMostrarConvocamento] = useState(true);
   const [jogoIniciado, setJogoIniciado] = useState(false);
   const [naves, setNaves] = useState([]);
@@ -312,6 +316,17 @@ export function SpacePosition() {
   const [navesErradas, setNavesErradas] = useState([]); // Rastrear erros
   const [estadoJogo, setEstadoJogo] = useState('jogando'); // 'jogando', 'vitoria', 'derrota'
   const [mensagemReforco, setMensagemReforco] = useState(false);
+
+  useEffect(() => {
+    if (estadoJogo === 'vitoria' && !premioVitoriaRef.current) {
+      premioVitoriaRef.current = true;
+      void ganharPontos(PONTOS_VITORIA);
+      void concluirMissao();
+    }
+    if (estadoJogo === 'jogando') {
+      premioVitoriaRef.current = false;
+    }
+  }, [estadoJogo, ganharPontos, concluirMissao]);
 
   // Inicializar naves quando o jogo começar
   useEffect(() => {

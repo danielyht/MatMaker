@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, ArrowUp, ArrowDown, Cookie } from 'lucide-react';
+import { usePontosMissao } from '../hooks/usePontosMissao';
+
+const PONTOS_POR_ACERTO = 40;
 
 interface Pergunta {
   id: number;
@@ -524,8 +527,10 @@ export function FractionsGame() {
   const [denominador, setDenominador] = useState(0);
   const [estado, setEstado] = useState<'respondendo' | 'correto' | 'incorreto'>('respondendo');
   const [pontuacao, setPontuacao] = useState(0);
+  const { ganharPontos, concluirMissao } = usePontosMissao();
 
   const perguntaAtual = PERGUNTAS[perguntaAtualIndex];
+  const ultimaPergunta = perguntaAtualIndex === PERGUNTAS.length - 1;
 
   function verificarResposta() {
     if (
@@ -533,10 +538,15 @@ export function FractionsGame() {
     ) {
       setEstado('correto');
       setPontuacao((prev) => prev + 1);
+      void ganharPontos(PONTOS_POR_ACERTO);
     } else {
       setEstado('incorreto');
     }
   }
+
+  useEffect(() => {
+    if (ultimaPergunta && estado === 'correto') void concluirMissao();
+  }, [ultimaPergunta, estado, concluirMissao]);
 
   function proximaPergunta() {
     if (perguntaAtualIndex < PERGUNTAS.length - 1) {

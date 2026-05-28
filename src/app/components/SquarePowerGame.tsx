@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, Sparkles, Zap, Leaf, Flame } from 'lucide-react';
 import { Progress } from './ui/progress';
+import { usePontosMissao } from '../hooks/usePontosMissao';
 
 type Nivel = 'facil' | 'medio' | 'dificil';
 
@@ -359,7 +360,7 @@ export function SquarePowerGame() {
   const [indice, setIndice] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
-  const [pontos, setPontos] = useState(0);
+  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao();
   const [mostrarDica, setMostrarDica] = useState(false);
 
   const pergunta = lista[indice];
@@ -374,7 +375,7 @@ export function SquarePowerGame() {
     setNivel(n);
     setLista(montarListaNivel(n));
     setIndice(0);
-    setPontos(0);
+    resetSessao();
     setEscolha(null);
     setFeedback('idle');
     setMostrarDica(false);
@@ -384,7 +385,7 @@ export function SquarePowerGame() {
     setNivel(null);
     setLista([]);
     setIndice(0);
-    setPontos(0);
+    resetSessao();
     setEscolha(null);
     setFeedback('idle');
     setMostrarDica(false);
@@ -398,7 +399,7 @@ export function SquarePowerGame() {
     if (opcao?.correta) {
       setFeedback('certo');
       setMostrarDica(false);
-      setPontos((p) => p + PONTOS[nivel ?? 'facil']);
+      void ganharPontos(PONTOS[nivel ?? 'facil']);
       playSomSucesso();
     } else {
       setFeedback('errado');
@@ -413,6 +414,10 @@ export function SquarePowerGame() {
 
   const progressoPercentual = lista.length ? ((indice + 1) / lista.length) * 100 : 0;
   const ultimoAcerto = feedback === 'certo' && indice === lista.length - 1;
+
+  useEffect(() => {
+    if (ultimoAcerto) void concluirMissao();
+  }, [ultimoAcerto, concluirMissao]);
 
   const badge =
     nivel === 'facil' ? 'Fácil' : nivel === 'medio' ? 'Médio' : nivel === 'dificil' ? 'Difícil' : '';

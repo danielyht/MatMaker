@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, Sparkles, ShoppingBag } from 'lucide-react';
 import { Progress } from './ui/progress';
+import { usePontosMissao } from '../hooks/usePontosMissao';
 
 const PONTOS_POR_ACERTO = 50;
 const TOTAL_PERGUNTAS = 15;
@@ -356,7 +357,7 @@ export function MarketChallengeGame() {
   const [indice, setIndice] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
-  const [pontos, setPontos] = useState(0);
+  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao();
   const [mostrarDica, setMostrarDica] = useState(false);
 
   const pergunta = lista[indice];
@@ -370,7 +371,7 @@ export function MarketChallengeGame() {
   const iniciar = () => {
     setLista(montarDesafio());
     setIndice(0);
-    setPontos(0);
+    resetSessao();
     setComecou(true);
     setEscolha(null);
     setFeedback('idle');
@@ -400,6 +401,10 @@ export function MarketChallengeGame() {
 
   const progressoPercentual = lista.length ? ((indice + 1) / lista.length) * 100 : 0;
   const ultimoAcerto = feedback === 'certo' && indice === lista.length - 1;
+
+  useEffect(() => {
+    if (ultimoAcerto) void concluirMissao();
+  }, [ultimoAcerto, concluirMissao]);
 
   if (!comecou) {
     return (

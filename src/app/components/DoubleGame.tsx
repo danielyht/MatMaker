@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Apple, Check, X, Sparkles, Leaf, Flame } from 'lucide-react';
 import { Progress } from './ui/progress';
+import { usePontosMissao } from '../hooks/usePontosMissao';
 
 type Nivel = 'facil' | 'medio' | 'dificil';
 
@@ -362,7 +363,7 @@ export function DoubleGame() {
   const escolherNivel = (n: Nivel) => {
     setNivel(n);
     setIndice(0);
-    setPontos(0);
+    resetSessao();
     setSelecionadas(new Set());
     setFeedback('idle');
     setMostrarDica(false);
@@ -371,7 +372,7 @@ export function DoubleGame() {
   const voltarNiveis = () => {
     setNivel(null);
     setIndice(0);
-    setPontos(0);
+    resetSessao();
     setSelecionadas(new Set());
     setFeedback('idle');
     setMostrarDica(false);
@@ -383,7 +384,7 @@ export function DoubleGame() {
     if (n === esperado) {
       setFeedback('certo');
       setMostrarDica(false);
-      setPontos((p) => p + PONTOS[nivel]);
+      void ganharPontos(PONTOS[nivel]);
       playSomSucesso();
     } else {
       setFeedback('errado');
@@ -400,6 +401,10 @@ export function DoubleGame() {
 
   const progressoPercentual = lista.length ? ((indice + 1) / lista.length) * 100 : 0;
   const ultimaPerguntaAcertou = feedback === 'certo' && indice === lista.length - 1;
+
+  useEffect(() => {
+    if (ultimaPerguntaAcertou) void concluirMissao();
+  }, [ultimaPerguntaAcertou, concluirMissao]);
 
   const voltarPainel = () => navegar('/dashboard');
 

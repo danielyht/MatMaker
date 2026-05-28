@@ -9,6 +9,8 @@ import {
 } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
+import { adicionarPontos } from '../../lib/pontos';
+import { registrarJogoConcluido } from '../../lib/jogosConcluidos';
 
 export type Perfil = {
   id: string;
@@ -27,6 +29,10 @@ type AuthContextValue = {
   autenticado: boolean;
   sair: () => Promise<void>;
   recarregarPerfil: () => Promise<void>;
+  /** Persiste pontos no Supabase e atualiza o perfil na hora. */
+  ganharPontos: (quantidade: number) => Promise<void>;
+  /** Incrementa jogos_completados no perfil (uma vez por conclusão de missão). */
+  marcarMissaoConcluida: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -123,11 +129,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPerfil(null);
   }, []);
 
+  const ganharPontos = useCallback(
+    async (quantidade: number) => {
+      const userId = session?.user?.id;
+      if (!userId || quantidade <= 0) return;
+
+      const { pontos, erro } = await adicionarPontos(userId, quantidade);
+      if (!erro && pontos !== null) {
+        setPerfil((prev) => (prev ? { ...prev, pontos } : null));
+      }
+    },
+    [session?.user?.id],
+  );
+
+  const marcarMissaoConcluida = useCallback(async () => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    const { jogos_completados, erro } = await registrarJogoConcluido(userId);
+    if (!erro && jogos_completados !== null) {
+      setPerfil((prev) => (prev ? { ...prev, jogos_completados } : null));
+    }
+  }, [session?.user?.id]);
+
   const autenticado = Boolean(session?.user?.id);
 
   const valor = useMemo(
-    () => ({ session, perfil, carregando, autenticado, sair, recarregarPerfil }),
-    [session, perfil, carregando, autenticado, sair, recarregarPerfil],
+    () => ({
+      session,
+      perfil,
+      carregando,
+      autenticado,
+      sair,
+      recarregarPerfil,
+      ganharPontos,
+      marcarMissaoConcluida,
+    }),
+    [
+      session,
+      perfil,
+      carregando,
+      autenticado,
+      sair,
+      recarregarPerfil,
+      ganharPontos,
+      marcarMissaoConcluida,
+    ],
   );
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;

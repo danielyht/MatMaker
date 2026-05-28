@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router';
+import { RootLayout } from './RootLayout';
 import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { SpacePosition } from './components/SpacePosition';
@@ -29,34 +30,39 @@ const rotasProtegidas = [
 
 export const roteador = createBrowserRouter([
   {
-    path: '/',
-    Component: LandingPage,
-  },
-  {
-    path: '/cadastro',
-    Component: Cadastro,
-  },
-  {
-    path: '/login',
-    Component: Login,
-  },
-  {
-    path: '/esqueci-senha',
-    Component: EsqueciSenha,
-  },
-  {
-    path: '/redefinir-senha',
-    Component: RedefinirSenha,
-  },
-  {
-    path: '/sobre',
-    Component: SobrePlaceholderPage,
-  },
-  {
-    element: <ProtectedRoute />,
-    children: rotasProtegidas.map((rota) => ({
-      path: rota.path,
-      Component: rota.Component,
-    })),
+    element: <RootLayout />,
+    children: [
+      {
+        path: '/',
+        Component: LandingPage,
+      },
+      {
+        path: '/cadastro',
+        Component: Cadastro,
+      },
+      {
+        path: '/login',
+        Component: Login,
+      },
+      {
+        path: '/esqueci-senha',
+        Component: EsqueciSenha,
+      },
+      {
+        path: '/redefinir-senha',
+        Component: RedefinirSenha,
+      },
+      {
+        path: '/sobre',
+        Component: SobrePlaceholderPage,
+      },
+      {
+        element: <ProtectedRoute />,
+        children: rotasProtegidas.map((rota) => ({
+          path: rota.path,
+          Component: rota.Component,
+        })),
+      },
+    ],
   },
 ]);
