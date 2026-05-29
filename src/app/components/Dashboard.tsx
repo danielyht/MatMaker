@@ -15,6 +15,8 @@ import {
 import { MathSymbolsBackground } from './MathSymbolsBackground';
 import { MatMakerLogo } from './MatMakerLogo';
 import { useAuth } from '../contexts/AuthContext';
+import { obterLigaPorPontos } from '../constants/ligasRanking';
+import { BadgeLiga } from './BadgeLiga';
 
 export function Dashboard() {
   const navegar = useNavigate();
@@ -152,8 +154,9 @@ export function Dashboard() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-lg font-bold sm:text-xl">Ranking</h3>
-            <p className="mt-1 text-sm text-[#1E40AF]/70">
-              Veja quem está na frente — {perfil?.pontos ?? 0} pts seus
+            <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#1E40AF]/70">
+              <span>{perfil?.pontos ?? 0} pts</span>
+              {perfil ? <BadgeLiga liga={obterLigaPorPontos(perfil.pontos)} tamanho="sm" /> : null}
             </p>
           </div>
           <span className="shrink-0 rounded-2xl bg-[#FF8C00] px-4 py-2 text-sm font-bold text-white shadow-md">

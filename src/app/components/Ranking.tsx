@@ -8,6 +8,8 @@ import { MeuPerfilRanking } from './MeuPerfilRanking';
 import { useAuth } from '../contexts/AuthContext';
 import { buscarRanking, type EntradaRanking } from '../../lib/ranking';
 import { COR_SUCESSO } from '../constants/matmakerBrand';
+import { obterLigaPorPontos, LIGAS_RANKING } from '../constants/ligasRanking';
+import { BadgeLiga } from './BadgeLiga';
 
 const MEDALHAS = ['🥇', '🥈', '🥉'] as const;
 
@@ -71,7 +73,7 @@ export function Ranking() {
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold leading-tight sm:text-2xl">Ranking</h1>
             <p className="mt-0.5 text-sm font-medium text-[#1E40AF]/70">
-              Seu progresso e a classificação geral
+              Ligas por pontos e classificação geral
             </p>
           </div>
           <button
@@ -94,6 +96,12 @@ export function Ranking() {
             posicaoRanking={minhaPosicao}
           />
         )}
+
+        <div className="flex flex-wrap justify-center gap-1.5 px-1">
+          {LIGAS_RANKING.map((liga) => (
+            <BadgeLiga key={liga.id} liga={liga} tamanho="sm" />
+          ))}
+        </div>
 
         <div className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-4">
           <div className="mb-3 flex items-center gap-2 px-1 sm:mb-4">
@@ -131,6 +139,7 @@ export function Ranking() {
                 const posicao = indice + 1;
                 const ehEu = entrada.id === meuId;
                 const topTres = posicao <= 3;
+                const liga = obterLigaPorPontos(entrada.pontos);
 
                 return (
                   <li
@@ -156,16 +165,19 @@ export function Ranking() {
                       tamanho={topTres || ehEu ? 'md' : 'sm'}
                     />
 
-                    <p className="min-w-0 flex-1 truncate text-sm font-bold sm:text-base">
-                      {entrada.nome}
-                      {ehEu ? (
-                        <span className="ml-1.5 text-xs font-semibold text-[#FF8C00]">(você)</span>
-                      ) : null}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold sm:text-base">
+                        {entrada.nome}
+                        {ehEu ? (
+                          <span className="ml-1.5 text-xs font-semibold text-[#FF8C00]">(você)</span>
+                        ) : null}
+                      </p>
+                      <BadgeLiga liga={liga} tamanho="sm" className="mt-1" />
+                    </div>
 
                     <p
                       className="shrink-0 text-base font-bold tabular-nums sm:text-lg"
-                      style={{ color: topTres ? COR_SUCESSO : '#3498DB' }}
+                      style={{ color: topTres ? COR_SUCESSO : liga.cor }}
                     >
                       {entrada.pontos}
                       <span className="ml-0.5 text-[10px] font-semibold text-[#1E40AF]/45">pts</span>
