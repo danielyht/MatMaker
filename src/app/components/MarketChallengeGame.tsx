@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, Sparkles, ShoppingBag } from 'lucide-react';
 import { Progress } from './ui/progress';
 import { usePontosMissao } from '../hooks/usePontosMissao';
+import { useGuiaEnzo } from '../hooks/useGuiaEnzo';
+import { GuiaEnzo } from './GuiaEnzo';
 
 const PONTOS_POR_ACERTO = 50;
 const TOTAL_PERGUNTAS = 15;
@@ -357,7 +359,8 @@ export function MarketChallengeGame() {
   const [indice, setIndice] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
-  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao();
+  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao('desafio-mercado');
+  const enzo = useGuiaEnzo('mercado');
   const [mostrarDica, setMostrarDica] = useState(false);
 
   const pergunta = lista[indice];
@@ -386,17 +389,24 @@ export function MarketChallengeGame() {
     if (opcao?.correta) {
       setFeedback('certo');
       setMostrarDica(false);
-      setPontos((p) => p + PONTOS_POR_ACERTO);
+      enzo.mostrarAcerto();
+      void ganharPontos(PONTOS_POR_ACERTO);
       playSomSucesso();
     } else {
       setFeedback('errado');
       setMostrarDica(true);
+      enzo.mostrarErro();
       playSomErro();
     }
   };
 
   const proxima = () => {
-    if (indice < lista.length - 1) setIndice((i) => i + 1);
+    if (indice < lista.length - 1) {
+      enzo.mostrarProgresso();
+      setIndice((i) => i + 1);
+    } else {
+      enzo.mostrarFim();
+    }
   };
 
   const progressoPercentual = lista.length ? ((indice + 1) / lista.length) * 100 : 0;
@@ -573,6 +583,8 @@ export function MarketChallengeGame() {
           )}
         </div>
       </div>
+
+      <GuiaEnzo {...enzo.props} />
     </div>
   );
 }

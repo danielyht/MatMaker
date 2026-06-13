@@ -2,6 +2,8 @@ import { Fragment, useEffect, useRef, useState, type DragEvent, type MouseEvent 
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, Sparkles, Layers3 } from 'lucide-react';
 import { usePontosMissao } from '../hooks/usePontosMissao';
+import { useGuiaEnzo } from '../hooks/useGuiaEnzo';
+import { GuiaEnzo } from './GuiaEnzo';
 
 interface PerguntaMD {
   id: number;
@@ -398,7 +400,8 @@ export function MaterialDouradoGame() {
   const [resposta, setResposta] = useState('');
   const [proximoId, setProximoId] = useState(1);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
-  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao();
+  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao('material-dourado');
+  const enzo = useGuiaEnzo('material-dourado');
   /** Toque: escolher peça na paleta e tocar na coluna (HTML5 drag quase não funciona em telemóvel). */
   const [pecaSelecionada, setPecaSelecionada] = useState<BlocoTipo | null>(null);
   /** Evita que o "click" fantasma após soltar o arrastar ligue/desligue a seleção por toque. */
@@ -458,10 +461,12 @@ export function MaterialDouradoGame() {
     const okNum = Number.isFinite(n) && Math.round(n) === pergunta.resultado;
     if (okNum) {
       setFeedback('certo');
+      enzo.mostrarAcerto();
       void ganharPontos(PONTOS);
       playSomSucesso();
     } else {
       setFeedback('errado');
+      enzo.mostrarErro();
       playSomErro();
     }
   };
@@ -473,7 +478,12 @@ export function MaterialDouradoGame() {
   };
 
   const proxima = () => {
-    if (indice < perguntas.length - 1) setIndice((i) => i + 1);
+    if (indice < perguntas.length - 1) {
+      enzo.mostrarProgresso();
+      setIndice((i) => i + 1);
+    } else {
+      enzo.mostrarFim();
+    }
   };
 
   const tipoDoDataTransfer = (e: DragEvent): BlocoTipo | null => {
@@ -756,6 +766,7 @@ export function MaterialDouradoGame() {
           </div>
         </div>
       )}
+      <GuiaEnzo {...enzo.props} />
     </div>
   );
 }

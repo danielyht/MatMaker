@@ -1,10 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import type { SlugMissao } from '../constants/jogos';
 
 /**
  * Pontos da sessão atual (HUD do jogo) + sincronização automática com o perfil no Supabase.
  */
-export function usePontosMissao() {
+export function usePontosMissao(slug: SlugMissao) {
   const { ganharPontos: syncPontos, marcarMissaoConcluida } = useAuth();
   const [pontosSessao, setPontosSessao] = useState(0);
   const missaoRegistradaRef = useRef(false);
@@ -21,8 +22,8 @@ export function usePontosMissao() {
   const concluirMissao = useCallback(async () => {
     if (missaoRegistradaRef.current) return;
     missaoRegistradaRef.current = true;
-    await marcarMissaoConcluida();
-  }, [marcarMissaoConcluida]);
+    await marcarMissaoConcluida(slug);
+  }, [marcarMissaoConcluida, slug]);
 
   const resetSessao = useCallback(() => {
     setPontosSessao(0);

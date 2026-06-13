@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, ArrowUp, ArrowDown, Cookie } from 'lucide-react';
 import { usePontosMissao } from '../hooks/usePontosMissao';
+import { useGuiaEnzo } from '../hooks/useGuiaEnzo';
+import { GuiaEnzo } from './GuiaEnzo';
 
 const PONTOS_POR_ACERTO = 40;
 
@@ -527,7 +529,8 @@ export function FractionsGame() {
   const [denominador, setDenominador] = useState(0);
   const [estado, setEstado] = useState<'respondendo' | 'correto' | 'incorreto'>('respondendo');
   const [pontuacao, setPontuacao] = useState(0);
-  const { ganharPontos, concluirMissao } = usePontosMissao();
+  const { ganharPontos, concluirMissao } = usePontosMissao('fractions');
+  const enzo = useGuiaEnzo('fractions');
 
   const perguntaAtual = PERGUNTAS[perguntaAtualIndex];
   const ultimaPergunta = perguntaAtualIndex === PERGUNTAS.length - 1;
@@ -538,9 +541,11 @@ export function FractionsGame() {
     ) {
       setEstado('correto');
       setPontuacao((prev) => prev + 1);
+      enzo.mostrarAcerto();
       void ganharPontos(PONTOS_POR_ACERTO);
     } else {
       setEstado('incorreto');
+      enzo.mostrarErro();
     }
   }
 
@@ -550,12 +555,13 @@ export function FractionsGame() {
 
   function proximaPergunta() {
     if (perguntaAtualIndex < PERGUNTAS.length - 1) {
+      enzo.mostrarProgresso();
       setPerguntaAtualIndex((prev) => prev + 1);
       setNumerador(0);
       setDenominador(0);
       setEstado('respondendo');
     } else {
-      // Fim do jogo
+      enzo.mostrarFim();
       navegar('/dashboard');
     }
   }
@@ -733,6 +739,8 @@ export function FractionsGame() {
             </div>
           </div>
         </div>
-      </div>
+
+      <GuiaEnzo {...enzo.props} />
+    </div>
   );
 }

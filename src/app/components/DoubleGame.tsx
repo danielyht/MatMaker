@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { ChevronLeft, Apple, Check, X, Sparkles, Leaf, Flame } from 'lucide-react';
 import { Progress } from './ui/progress';
 import { usePontosMissao } from '../hooks/usePontosMissao';
+import { useGuiaEnzo } from '../hooks/useGuiaEnzo';
+import { GuiaEnzo } from './GuiaEnzo';
 
 type Nivel = 'facil' | 'medio' | 'dificil';
 
@@ -332,6 +334,8 @@ export function DoubleGame() {
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
   const [pontos, setPontos] = useState(0);
   const [mostrarDica, setMostrarDica] = useState(false);
+  const { ganharPontos, concluirMissao, resetSessao } = usePontosMissao('dobro');
+  const { mostrarAcerto, mostrarErro, mostrarProgresso, mostrarFim, props: enzoProps } = useGuiaEnzo('dobro');
 
   useEffect(() => {
     setSelecionadas(new Set());
@@ -384,18 +388,23 @@ export function DoubleGame() {
     if (n === esperado) {
       setFeedback('certo');
       setMostrarDica(false);
+      mostrarAcerto();
       void ganharPontos(PONTOS[nivel]);
       playSomSucesso();
     } else {
       setFeedback('errado');
       setMostrarDica(true);
+      mostrarErro();
       playSomErro();
     }
-  }, [selecionadas.size, esperado, nivel]);
+  }, [selecionadas.size, esperado, nivel, mostrarAcerto, mostrarErro, ganharPontos]);
 
   const proximaPergunta = () => {
     if (indice < lista.length - 1) {
+      mostrarProgresso();
       setIndice((i) => i + 1);
+    } else {
+      mostrarFim();
     }
   };
 
@@ -626,6 +635,8 @@ export function DoubleGame() {
           )}
         </div>
       </div>
+
+      <GuiaEnzo {...enzoProps} />
     </div>
   );
 }

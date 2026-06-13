@@ -1,19 +1,10 @@
 /** Ligas por pontuação acumulada (do menor ao maior). */
 export const LIGAS_RANKING = [
   {
-    id: 'ferro',
-    nome: 'Ferro',
-    minPontos: 0,
-    cor: '#5C6B7A',
-    corClara: '#9CA3AF',
-    gradiente: 'from-[#6B7280] to-[#4B5563]',
-    fundo: 'bg-[#E5E7EB]/90',
-    borda: 'border-[#9CA3AF]/60',
-  },
-  {
     id: 'bronze',
     nome: 'Bronze',
-    minPontos: 200,
+    minPontos: 0,
+    icone: '/ligas/IconeBronze.svg',
     cor: '#92400E',
     corClara: '#D97706',
     gradiente: 'from-[#B45309] to-[#78350F]',
@@ -23,7 +14,8 @@ export const LIGAS_RANKING = [
   {
     id: 'prata',
     nome: 'Prata',
-    minPontos: 400,
+    minPontos: 500,
+    icone: '/ligas/IconePrata.svg',
     cor: '#475569',
     corClara: '#94A3B8',
     gradiente: 'from-[#94A3B8] to-[#64748B]',
@@ -33,7 +25,8 @@ export const LIGAS_RANKING = [
   {
     id: 'ouro',
     nome: 'Ouro',
-    minPontos: 800,
+    minPontos: 1200,
+    icone: '/ligas/IconeOuro.svg',
     cor: '#B45309',
     corClara: '#FBBF24',
     gradiente: 'from-[#FCD34D] to-[#D97706]',
@@ -41,19 +34,10 @@ export const LIGAS_RANKING = [
     borda: 'border-[#FBBF24]/55',
   },
   {
-    id: 'platina',
-    nome: 'Platina',
-    minPontos: 1200,
-    cor: '#0E7490',
-    corClara: '#22D3EE',
-    gradiente: 'from-[#67E8F9] to-[#0891B2]',
-    fundo: 'bg-[#ECFEFF]/95',
-    borda: 'border-[#22D3EE]/45',
-  },
-  {
     id: 'diamante',
     nome: 'Diamante',
-    minPontos: 1800,
+    minPontos: 2500,
+    icone: '/ligas/IconeDiamante.svg',
     cor: '#1D4ED8',
     corClara: '#60A5FA',
     gradiente: 'from-[#93C5FD] to-[#2563EB]',
@@ -63,22 +47,13 @@ export const LIGAS_RANKING = [
   {
     id: 'ascendente',
     nome: 'Ascendente',
-    minPontos: 2500,
+    minPontos: 4500,
+    icone: '/ligas/IconeAscendente.svg',
     cor: '#6D28D9',
     corClara: '#A78BFA',
     gradiente: 'from-[#C4B5FD] to-[#7C3AED]',
     fundo: 'bg-[#F5F3FF]/95',
     borda: 'border-[#A78BFA]/50',
-  },
-  {
-    id: 'desafiante',
-    nome: 'Desafiante',
-    minPontos: 3500,
-    cor: '#BE123C',
-    corClara: '#FB7185',
-    gradiente: 'from-[#F43F5E] to-[#BE123C]',
-    fundo: 'bg-[#FFF1F2]/95',
-    borda: 'border-[#FB7185]/55',
   },
 ] as const;
 

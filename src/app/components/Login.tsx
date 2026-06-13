@@ -7,18 +7,23 @@ import { COR_FUNDO_SISTEMA, COR_PRIMARIA } from '../constants/matmakerBrand';
 import { supabase, supabaseConfigurado } from '../../lib/supabaseClient';
 import { traduzirErroAuth } from '../../lib/traduzirErroAuth';
 import { useAuth } from '../contexts/AuthContext';
+import { rotaInicialPorPapel } from '../constants/turmas';
 
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { autenticado, carregando: authCarregando } = useAuth();
-  const destino = (location.state as { from?: string } | null)?.from ?? '/dashboard';
+  const { autenticado, carregando: authCarregando, perfil } = useAuth();
+  const destinoSalvo = (location.state as { from?: string } | null)?.from;
 
   useEffect(() => {
-    if (!authCarregando && autenticado) {
+    if (!authCarregando && autenticado && perfil) {
+      const destino =
+        destinoSalvo && destinoSalvo !== '/login'
+          ? destinoSalvo
+          : rotaInicialPorPapel(perfil.papel);
       navigate(destino, { replace: true });
     }
-  }, [authCarregando, autenticado, destino, navigate]);
+  }, [authCarregando, autenticado, perfil, destinoSalvo, navigate]);
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -68,7 +73,7 @@ export function Login() {
       }
 
       setMensagem({ tipo: 'sucesso', texto: 'Login realizado! Redirecionando…' });
-      window.setTimeout(() => navigate(destino, { replace: true }), 600);
+      /* redirect via useEffect when perfil loads */
     } catch {
       setMensagem({
         tipo: 'erro',

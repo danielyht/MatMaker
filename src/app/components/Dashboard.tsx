@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { LogOut } from 'lucide-react';
 import {
@@ -11,16 +11,35 @@ import {
   Layers3,
   Play,
   Trophy,
+  Award,
+  GraduationCap,
 } from 'lucide-react';
 import { MathSymbolsBackground } from './MathSymbolsBackground';
 import { MatMakerLogo } from './MatMakerLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { obterLigaPorPontos } from '../constants/ligasRanking';
+import { MapaLaboratorio } from './MapaLaboratorio';
 import { BadgeLiga } from './BadgeLiga';
+import { useGamificacao } from '../contexts/GamificacaoContext';
+import { listarTurmasAluno } from '../../lib/turmas';
 
 export function Dashboard() {
   const navegar = useNavigate();
-  const { perfil, sair, autenticado, carregando } = useAuth();
+  const { perfil, sair, autenticado, carregando, ehProfessor } = useAuth();
+  const { totalConquistas, totalPossivel } = useGamificacao();
+  const [minhasTurmas, setMinhasTurmas] = useState<{ id: string; nome: string }[]>([]);
+
+  useEffect(() => {
+    if (!carregando && autenticado && ehProfessor) {
+      navegar('/professor', { replace: true });
+    }
+  }, [carregando, autenticado, ehProfessor, navegar]);
+
+  useEffect(() => {
+    if (perfil?.id && perfil.papel === 'aluno') {
+      void listarTurmasAluno(perfil.id).then(({ turmas }) => setMinhasTurmas(turmas));
+    }
+  }, [perfil?.id, perfil?.papel]);
 
   useEffect(() => {
     if (!carregando && !autenticado) {
@@ -85,7 +104,7 @@ export function Dashboard() {
     },
   ];
 
-  if (carregando || !autenticado) {
+  if (carregando || !autenticado || ehProfessor) {
     return null;
   }
 
@@ -146,23 +165,67 @@ export function Dashboard() {
 
         <button
           type="button"
-          onClick={() => navegar('/ranking')}
-          className="stage-panel flex w-full items-center gap-4 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-12px_rgba(255,140,0,0.25)] active:scale-[0.99] sm:p-5"
+          onClick={() => navegar('/entrar-turma')}
+          className="stage-panel flex w-full items-center gap-4 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-12px_rgba(124,58,237,0.22)] active:scale-[0.99] sm:p-5"
         >
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF8C00] to-[#3498DB] shadow-md sm:h-16 sm:w-16">
-            <Trophy className="h-7 w-7 text-white sm:h-8 sm:w-8" />
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#3498DB] shadow-md sm:h-16 sm:w-16">
+            <GraduationCap className="h-7 w-7 text-white sm:h-8 sm:w-8" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold sm:text-xl">Ranking</h3>
-            <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#1E40AF]/70">
-              <span>{perfil?.pontos ?? 0} pts</span>
-              {perfil ? <BadgeLiga liga={obterLigaPorPontos(perfil.pontos)} tamanho="sm" /> : null}
+            <h3 className="text-lg font-bold sm:text-xl">Minha turma</h3>
+            <p className="mt-1 text-sm text-[#1E40AF]/70">
+              {minhasTurmas.length > 0
+                ? minhasTurmas.map((t) => t.nome).join(' · ')
+                : 'Entre com o código do professor'}
             </p>
           </div>
-          <span className="shrink-0 rounded-2xl bg-[#FF8C00] px-4 py-2 text-sm font-bold text-white shadow-md">
-            Ver
+          <span className="shrink-0 rounded-2xl bg-[#7C3AED] px-4 py-2 text-sm font-bold text-white shadow-md">
+            {minhasTurmas.length > 0 ? 'Ver' : 'Entrar'}
           </span>
         </button>
+
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => navegar('/conquistas')}
+            className="stage-panel flex w-full items-center gap-4 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-12px_rgba(52,152,219,0.28)] active:scale-[0.99] sm:p-5"
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3498DB] to-[#7C3AED] shadow-md sm:h-16 sm:w-16">
+              <Award className="h-7 w-7 text-white sm:h-8 sm:w-8" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg font-bold sm:text-xl">Conquistas</h3>
+              <p className="mt-1 text-sm text-[#1E40AF]/70">
+                {totalConquistas}/{totalPossivel} desbloqueadas
+              </p>
+            </div>
+            <span className="shrink-0 rounded-2xl bg-[#3498DB] px-4 py-2 text-sm font-bold text-white shadow-md">
+              Ver
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navegar('/ranking')}
+            className="stage-panel flex w-full items-center gap-4 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-12px_rgba(255,140,0,0.25)] active:scale-[0.99] sm:p-5"
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF8C00] to-[#3498DB] shadow-md sm:h-16 sm:w-16">
+              <Trophy className="h-7 w-7 text-white sm:h-8 sm:w-8" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg font-bold sm:text-xl">Ranking</h3>
+              <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#1E40AF]/70">
+                <span>{perfil?.pontos ?? 0} pts</span>
+                {perfil ? <BadgeLiga liga={obterLigaPorPontos(perfil.pontos)} tamanho="sm" /> : null}
+              </p>
+            </div>
+            <span className="shrink-0 rounded-2xl bg-[#FF8C00] px-4 py-2 text-sm font-bold text-white shadow-md">
+              Ver
+            </span>
+          </button>
+        </div>
+
+        <MapaLaboratorio missoesConcluidas={perfil?.missoes_concluidas ?? []} />
 
         {/* Lista de atividades */}
         <div className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-4 md:p-5">

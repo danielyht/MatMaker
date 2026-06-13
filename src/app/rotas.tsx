@@ -15,11 +15,18 @@ import { EsqueciSenha } from './components/EsqueciSenha';
 import { RedefinirSenha } from './components/RedefinirSenha';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Ranking } from './components/Ranking';
+import { ConquistasPage } from './components/ConquistasPage';
+import { ProfessorRoute } from './components/ProfessorRoute';
+import { ProfessorDashboard } from './components/ProfessorDashboard';
+import { TurmaDetalhe } from './components/TurmaDetalhe';
+import { EntrarTurma } from './components/EntrarTurma';
 
 /** Rotas que exigem login (laboratório e jogos). */
 const rotasProtegidas = [
   { path: 'dashboard', Component: Dashboard },
   { path: 'ranking', Component: Ranking },
+  { path: 'conquistas', Component: ConquistasPage },
+  { path: 'entrar-turma', Component: EntrarTurma },
   { path: 'space-position', Component: SpacePosition },
   { path: 'fractions', Component: FractionsGame },
   { path: 'dobro', Component: DoubleGame },
@@ -55,6 +62,13 @@ export const roteador = createBrowserRouter([
       {
         path: '/sobre',
         Component: SobrePlaceholderPage,
+      },
+      {
+        element: <ProfessorRoute />,
+        children: [
+          { path: 'professor', Component: ProfessorDashboard },
+          { path: 'professor/turma/:turmaId', Component: TurmaDetalhe },
+        ],
       },
       {
         element: <ProtectedRoute />,

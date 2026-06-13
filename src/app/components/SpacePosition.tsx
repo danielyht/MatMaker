@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, Rocket, Target, Zap, Heart, Crosshair } from 'lucide-react';
 import { usePontosMissao } from '../hooks/usePontosMissao';
+import { useGuiaEnzo } from '../hooks/useGuiaEnzo';
+import { EnzoAvatar, GuiaEnzo } from './GuiaEnzo';
 
 /** Quantidade de naves reais a eliminar (dicas em sequência) e balas disponíveis. */
 const INVASAO_NAVES_ALVO = 15;
@@ -62,9 +64,7 @@ function ModalConvocamento({ aoFechar, aoIniciar }) {
         <div className="overflow-y-auto p-3 text-white sm:p-6">
           {/* Avatar do companheiro */}
           <div className="flex justify-center mb-3">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-cyan-500 rounded-full flex items-center justify-center shadow-xl border-4 border-cyan-300/60">
-              <span className="text-4xl">🤖</span>
-            </div>
+            <EnzoAvatar variante="capitao" tamanho="lg" />
           </div>
 
           {/* Mensagem */}
@@ -162,9 +162,7 @@ function ModalVitoria({ aoProximaFase, aoRepetir }) {
             </div>
 
             <div className="flex items-center gap-2.5 bg-gradient-to-r from-primary/20 to-cyan-500/20 backdrop-blur-sm rounded-xl p-2.5 border border-primary/40">
-              <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-primary to-cyan-500 rounded-full flex items-center justify-center border-2 border-cyan-300/60">
-                <span className="text-lg">🤖</span>
-              </div>
+              <EnzoAvatar variante="capitao" tamanho="sm" />
               <div className="min-w-0">
                 <p className="text-cyan-200 font-bold text-[10px] mb-0.5">Enzo</p>
                 <p className="text-white text-xs italic leading-snug">
@@ -246,9 +244,7 @@ function ModalDerrota({ aoRepetir, aoVoltar, acertos, erros }) {
             </div>
 
             <div className="flex items-center gap-2.5 bg-gradient-to-r from-orange-500/15 to-amber-500/15 backdrop-blur-sm rounded-xl p-2.5 border border-orange-400/40">
-              <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-primary to-cyan-500 rounded-full flex items-center justify-center border-2 border-cyan-300/50">
-                <span className="text-lg">🤖</span>
-              </div>
+              <EnzoAvatar variante="capitao" tamanho="sm" />
               <div className="min-w-0">
                 <p className="text-orange-200 font-bold text-[10px] mb-0.5">Enzo</p>
                 <p className="text-white text-xs italic leading-snug">
@@ -304,7 +300,7 @@ function ModalDerrota({ aoRepetir, aoVoltar, acertos, erros }) {
 
 export function SpacePosition() {
   const navegar = useNavigate();
-  const { ganharPontos, concluirMissao } = usePontosMissao();
+  const { ganharPontos, concluirMissao } = usePontosMissao('space-position');
   const premioVitoriaRef = useRef(false);
   const [mostrarConvocamento, setMostrarConvocamento] = useState(true);
   const [jogoIniciado, setJogoIniciado] = useState(false);
@@ -316,6 +312,14 @@ export function SpacePosition() {
   const [navesErradas, setNavesErradas] = useState([]); // Rastrear erros
   const [estadoJogo, setEstadoJogo] = useState('jogando'); // 'jogando', 'vitoria', 'derrota'
   const [mensagemReforco, setMensagemReforco] = useState(false);
+  const {
+    definirMensagem,
+    mostrarAcerto,
+    mostrarErro,
+    mostrarFim,
+    mostrarInicio,
+    props: enzoProps,
+  } = useGuiaEnzo('space', { tema: 'escuro', posicao: 'inferior-esquerda' });
 
   useEffect(() => {
     if (estadoJogo === 'vitoria' && !premioVitoriaRef.current) {
@@ -470,14 +474,17 @@ export function SpacePosition() {
       setNavesAcertadas((prev) => [...prev, nave.id]);
 
       if (novosAcertos === INVASAO_NAVES_ALVO) {
+        mostrarFim();
         setEstadoJogo('vitoria');
       } else if (novoBalasRestantes === 0) {
         setEstadoJogo('derrota');
       } else {
+        mostrarAcerto();
         setDicaAtual((prev) => prev + 1);
       }
     } else {
       setNavesErradas((prev) => [...prev, nave.id]);
+      mostrarErro();
 
       // Hologramas permanecem no mapa; só naves reais erradas somem
       if (nave.tipo === 'real') {
@@ -508,10 +515,18 @@ export function SpacePosition() {
   function iniciarJogo() {
     setMostrarConvocamento(false);
     setJogoIniciado(true);
+    mostrarInicio();
   }
 
   // Pegar a nave alvo atual
   const naveAlvo = navesReaisOrdenadas[dicaAtual];
+
+  useEffect(() => {
+    if (!jogoIniciado || estadoJogo !== 'jogando' || !naveAlvo) return;
+    definirMensagem(
+      `"A nave ${naveAlvo.nome.toUpperCase()} está na ${naveAlvo.posicao.toUpperCase()}!"`,
+    );
+  }, [dicaAtual, jogoIniciado, estadoJogo, naveAlvo, definirMensagem]);
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 pb-[env(safe-area-inset-bottom)]">
@@ -703,16 +718,15 @@ export function SpacePosition() {
             ))}
           </div>
 
-          {/* Painel do Enzo (Dicas) */}
+          {/* Painel de Dicas */}
           <div className="relative z-20 flex w-full flex-shrink-0 flex-col border-t border-white/10 bg-black/40 px-3 py-3 backdrop-blur-md sm:px-5 sm:py-5 lg:w-80 lg:border-l lg:border-t-0 lg:p-6">
-            {/* Avatar do Enzo */}
-            <div className="mb-3 flex items-center gap-2 sm:mb-6 sm:gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[3px] border-cyan-300/60 bg-gradient-to-br from-primary to-cyan-500 shadow-lg sm:h-16 sm:w-16 sm:border-4">
-                <span className="text-xl sm:text-3xl">🤖</span>
+            <div className="mb-3 flex items-center gap-2 sm:mb-4 sm:gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/25 text-lg sm:h-10 sm:w-10">
+                📡
               </div>
               <div className="min-w-0">
-                <h3 className="text-sm font-bold text-white sm:text-lg">Enzo</h3>
-                <p className="text-xs text-cyan-200 sm:text-sm">Seu copiloto</p>
+                <h3 className="text-sm font-bold text-white sm:text-lg">Radar</h3>
+                <p className="text-xs text-cyan-200 sm:text-sm">Dicas da missão</p>
               </div>
             </div>
 
@@ -810,6 +824,8 @@ export function SpacePosition() {
           </div>
         </div>
       )}
+
+      <GuiaEnzo {...enzoProps} visivel={jogoIniciado && estadoJogo === 'jogando'} />
     </div>
   );
 }

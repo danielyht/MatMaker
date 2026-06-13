@@ -1,6 +1,6 @@
 import { Gamepad2, Star, Trophy } from 'lucide-react';
 import { AvatarRanking } from './AvatarRanking';
-import { BadgeLiga } from './BadgeLiga';
+import { BadgeLiga, IconeLiga } from './BadgeLiga';
 import { TOTAL_MISSOES } from '../constants/jogos';
 import { progressoNaLiga } from '../constants/ligasRanking';
 import { COR_PRIMARIA, COR_SUCESSO } from '../constants/matmakerBrand';
@@ -39,14 +39,15 @@ export function MeuPerfilRanking({
       </p>
 
       <div className="relative mt-4 flex flex-col items-center text-center">
-        <div
-          className={`zero-gravity-float-slow rounded-full p-1 ring-4 ring-offset-2 ring-offset-[#EBF4FA]/50 ${liga.borda}`}
-          style={{ boxShadow: `0 0 20px ${liga.corClara}40` }}
-        >
+        <div className="zero-gravity-float-slow relative">
           <AvatarRanking nome={nome} fotoUrl={fotoUrl} destaque tamanho="xl" />
+          <IconeLiga
+            liga={liga}
+            className="absolute -bottom-2 -right-2 h-11 w-11 sm:h-12 sm:w-12"
+          />
         </div>
 
-        <h2 className="mt-4 max-w-full truncate text-xl font-bold text-[#1E40AF] sm:text-2xl">
+        <h2 className="mt-5 max-w-full truncate text-xl font-bold text-[#1E40AF] sm:text-2xl">
           {nome}
         </h2>
 

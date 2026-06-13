@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { COR_FUNDO_SISTEMA } from '../constants/matmakerBrand';
 import { useAuth } from '../contexts/AuthContext';
+import { GamificacaoProvider } from '../contexts/GamificacaoContext';
 import { supabaseConfigurado } from '../../lib/supabaseClient';
 import { MatMakerLogo } from './MatMakerLogo';
 
@@ -30,5 +31,9 @@ export function ProtectedRoute() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <GamificacaoProvider>
+      <Outlet />
+    </GamificacaoProvider>
+  );
 }

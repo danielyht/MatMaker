@@ -5,6 +5,7 @@ import { traduzirErroAuth } from '../../lib/traduzirErroAuth';
 import { MatMakerLogo } from './MatMakerLogo';
 import { MathSymbolsBackground } from './MathSymbolsBackground';
 import { COR_FUNDO_SISTEMA, COR_SUCESSO } from '../constants/matmakerBrand';
+import { rotaInicialPorPapel } from '../constants/turmas';
 import { supabase, supabaseConfigurado } from '../../lib/supabaseClient';
 
 const BUCKET_AVATARES = 'avatares';
@@ -24,6 +25,7 @@ export function Cadastro() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [foto, setFoto] = useState<File | null>(null);
+  const [papel, setPapel] = useState<'aluno' | 'professor'>('aluno');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [mensagem, setMensagem] = useState<{ tipo: 'erro' | 'sucesso'; texto: string } | null>(
@@ -137,14 +139,23 @@ export function Cadastro() {
         fotoUrl = urlData.publicUrl;
       }
 
-      const { error: perfilError } = await supabase.from('perfis').insert({
+      const perfilBase = {
         id: userId,
         nome: nomeTrim,
         email: emailTrim,
         foto_url: fotoUrl,
         pontos: 0,
         jogos_completados: 0,
-      });
+        papel,
+      };
+
+      let { error: perfilError } = await supabase.from('perfis').insert(perfilBase);
+
+      if (perfilError?.message?.includes('papel')) {
+        const { papel: _p, ...semPapel } = perfilBase;
+        const retry = await supabase.from('perfis').insert(semPapel);
+        perfilError = retry.error;
+      }
 
       if (perfilError) {
         setMensagem({
@@ -164,7 +175,7 @@ export function Cadastro() {
       });
 
       if (!precisaConfirmarEmail) {
-        window.setTimeout(() => navigate('/dashboard'), 1800);
+        window.setTimeout(() => navigate(rotaInicialPorPapel(papel)), 1800);
       }
     } catch {
       setMensagem({
@@ -240,6 +251,38 @@ export function Cadastro() {
                 placeholder="Seu nome"
               />
             </div>
+
+            <fieldset>
+              <legend className="mb-2 block text-sm font-semibold text-[#1E40AF]">
+                Eu sou…
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPapel('aluno')}
+                  disabled={carregando}
+                  className={`min-h-11 rounded-2xl border px-3 py-2 text-sm font-bold transition-all ${
+                    papel === 'aluno'
+                      ? 'border-[#3498DB] bg-[#3498DB]/10 text-[#3498DB] ring-2 ring-[#3498DB]/30'
+                      : 'border-[#3498DB]/20 bg-white/90 text-[#1E40AF]/70'
+                  }`}
+                >
+                  Aluno
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPapel('professor')}
+                  disabled={carregando}
+                  className={`min-h-11 rounded-2xl border px-3 py-2 text-sm font-bold transition-all ${
+                    papel === 'professor'
+                      ? 'border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED] ring-2 ring-[#7C3AED]/30'
+                      : 'border-[#3498DB]/20 bg-white/90 text-[#1E40AF]/70'
+                  }`}
+                >
+                  Professor
+                </button>
+              </div>
+            </fieldset>
 
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-[#1E40AF]">

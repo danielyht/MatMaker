@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { ChevronLeft, Check, X, Sparkles, Zap, Leaf, Flame } from 'lucide-react';
 import { Progress } from './ui/progress';
 import { usePontosMissao } from '../hooks/usePontosMissao';
+import { useGuiaEnzo } from '../hooks/useGuiaEnzo';
+import { GuiaEnzo } from './GuiaEnzo';
 
 type Nivel = 'facil' | 'medio' | 'dificil';
 
@@ -360,7 +362,8 @@ export function SquarePowerGame() {
   const [indice, setIndice] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'certo' | 'errado'>('idle');
-  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao();
+  const { pontosSessao: pontos, ganharPontos, concluirMissao, resetSessao } = usePontosMissao('potencias-quadrado');
+  const enzo = useGuiaEnzo('potencias');
   const [mostrarDica, setMostrarDica] = useState(false);
 
   const pergunta = lista[indice];
@@ -399,17 +402,24 @@ export function SquarePowerGame() {
     if (opcao?.correta) {
       setFeedback('certo');
       setMostrarDica(false);
+      enzo.mostrarAcerto();
       void ganharPontos(PONTOS[nivel ?? 'facil']);
       playSomSucesso();
     } else {
       setFeedback('errado');
       setMostrarDica(true);
+      enzo.mostrarErro();
       playSomErro();
     }
   };
 
   const proxima = () => {
-    if (indice < lista.length - 1) setIndice((i) => i + 1);
+    if (indice < lista.length - 1) {
+      enzo.mostrarProgresso();
+      setIndice((i) => i + 1);
+    } else {
+      enzo.mostrarFim();
+    }
   };
 
   const progressoPercentual = lista.length ? ((indice + 1) / lista.length) * 100 : 0;
@@ -647,6 +657,8 @@ export function SquarePowerGame() {
           )}
         </div>
       </div>
+
+      <GuiaEnzo {...enzo.props} />
     </div>
   );
 }
