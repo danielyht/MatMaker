@@ -25,6 +25,40 @@ create index if not exists turma_membros_aluno_id_idx on public.turma_membros (a
 alter table public.turmas enable row level security;
 alter table public.turma_membros enable row level security;
 
+-- Funções auxiliares (SECURITY DEFINER) evitam recursão infinita entre políticas de turmas ↔ turma_membros
+create or replace function public.eh_membro_da_turma(turma_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1
+    from public.turma_membros tm
+    where tm.turma_id = eh_membro_da_turma.turma_id
+      and tm.aluno_id = auth.uid()
+  );
+$$;
+
+create or replace function public.eh_professor_da_turma(turma_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1
+    from public.turmas t
+    where t.id = eh_professor_da_turma.turma_id
+      and t.professor_id = auth.uid()
+  );
+$$;
+
+grant execute on function public.eh_membro_da_turma(uuid) to authenticated;
+grant execute on function public.eh_professor_da_turma(uuid) to authenticated;
+
 -- Turmas: professor gerencia as próprias
 drop policy if exists "Turmas: professor lê" on public.turmas;
 create policy "Turmas: professor lê"
@@ -51,12 +85,7 @@ create policy "Turmas: professor exclui"
 drop policy if exists "Turmas: aluno membro lê" on public.turmas;
 create policy "Turmas: aluno membro lê"
   on public.turmas for select to authenticated
-  using (
-    exists (
-      select 1 from public.turma_membros tm
-      where tm.turma_id = turmas.id and tm.aluno_id = auth.uid()
-    )
-  );
+  using (public.eh_membro_da_turma(id));
 
 -- Membros: aluno vê as suas; professor vê alunos das suas turmas
 drop policy if exists "Membros: leitura" on public.turma_membros;
@@ -64,10 +93,7 @@ create policy "Membros: leitura"
   on public.turma_membros for select to authenticated
   using (
     aluno_id = auth.uid()
-    or exists (
-      select 1 from public.turmas t
-      where t.id = turma_membros.turma_id and t.professor_id = auth.uid()
-    )
+    or public.eh_professor_da_turma(turma_id)
   );
 
 drop policy if exists "Membros: aluno entra" on public.turma_membros;
@@ -96,3 +122,7 @@ as $$
 $$;
 
 grant execute on function public.resolver_codigo_turma(text) to authenticated;
+
+-- Permissões para a API do Supabase (PostgREST)
+grant select, insert, update, delete on public.turmas to authenticated;
+grant select, insert, delete on public.turma_membros to authenticated;

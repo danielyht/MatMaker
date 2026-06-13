@@ -7,6 +7,7 @@ alter table public.perfis
   add column if not exists jogos_completados integer not null default 0;
 
 -- Permite usuários logados verem o ranking (nome, foto, pontos).
+drop policy if exists "Ranking: leitura de todos os perfis" on public.perfis;
 create policy "Ranking: leitura de todos os perfis"
   on public.perfis for select
   to authenticated
@@ -16,7 +17,7 @@ create policy "Ranking: leitura de todos os perfis"
 create index if not exists perfis_pontos_desc_idx on public.perfis (pontos desc);
 
 -- Atualização de pontos (missões) — só o próprio usuário.
--- Ignore o erro se a política "Usuário atualiza o próprio perfil" já existir.
+drop policy if exists "Perfil: atualizar próprios pontos" on public.perfis;
 create policy "Perfil: atualizar próprios pontos"
   on public.perfis for update
   to authenticated

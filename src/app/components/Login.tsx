@@ -17,10 +17,14 @@ export function Login() {
 
   useEffect(() => {
     if (!authCarregando && autenticado && perfil) {
-      const destino =
-        destinoSalvo && destinoSalvo !== '/login'
-          ? destinoSalvo
-          : rotaInicialPorPapel(perfil.papel);
+      const rotaPorPapel = rotaInicialPorPapel(perfil.papel);
+      const destinoSalvoValido =
+        destinoSalvo &&
+        destinoSalvo !== '/login' &&
+        !(destinoSalvo.startsWith('/professor') && perfil.papel !== 'professor') &&
+        !(destinoSalvo === '/dashboard' && perfil.papel === 'professor');
+
+      const destino = destinoSalvoValido ? destinoSalvo : rotaPorPapel;
       navigate(destino, { replace: true });
     }
   }, [authCarregando, autenticado, perfil, destinoSalvo, navigate]);

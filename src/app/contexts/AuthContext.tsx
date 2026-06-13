@@ -97,6 +97,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (error) {
+      setPerfil(null);
+      return;
+    }
+
     setPerfil(
       data
         ? {
@@ -122,54 +127,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let ativo = true;
 
-    async function validarSessaoInicial() {
-      const { data: sessaoLocal } = await supabase.auth.getSession();
-
-      if (!ativo) return;
-
-      if (!sessaoLocal.session) {
+    async function sincronizarSessao(novaSessao: Session | null) {
+      if (!novaSessao?.user?.id) {
         setSession(null);
+        setPerfil(null);
         setCarregando(false);
         return;
       }
 
       const { data: usuarioRemoto, error } = await supabase.auth.getUser();
-
       if (!ativo) return;
 
       if (error || !usuarioRemoto.user) {
         await supabase.auth.signOut();
         setSession(null);
-      } else {
-        setSession(sessaoLocal.session);
+        setPerfil(null);
+        setCarregando(false);
+        return;
       }
 
-      setCarregando(false);
+      setSession(novaSessao);
+      await buscarPerfil(usuarioRemoto.user.id);
+      if (ativo) setCarregando(false);
     }
 
-    void validarSessaoInicial();
+    setCarregando(true);
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_evento, novaSessao) => {
       if (!ativo) return;
-      setSession(novaSessao);
-      if (!novaSessao) setPerfil(null);
+      void sincronizarSessao(novaSessao);
     });
 
     return () => {
       ativo = false;
       subscription.unsubscribe();
     };
-  }, []);
-
-  useEffect(() => {
-    if (session?.user.id) {
-      buscarPerfil(session.user.id);
-    } else {
-      setPerfil(null);
-    }
-  }, [session?.user.id, buscarPerfil]);
+  }, [buscarPerfil]);
 
   const sair = useCallback(async () => {
     if (supabase) await supabase.auth.signOut();

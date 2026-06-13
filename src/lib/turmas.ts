@@ -5,6 +5,33 @@ import { formatarCodigoTurma } from '../app/constants/turmas';
 
 const CARACTERES_CODIGO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
+function mensagemErroTurmas(mensagem: string, operacao: 'listar' | 'criar' = 'listar'): string {
+  const msg = mensagem.toLowerCase();
+
+  if (
+    msg.includes('does not exist') ||
+    msg.includes('schema cache') ||
+    msg.includes('could not find the table')
+  ) {
+    return 'Modo turma não configurado. Execute supabase/turmas-professor.sql no Supabase e, em seguida, recarregue o schema (Settings → API → Reload schema).';
+  }
+
+  if (
+    msg.includes('row-level security') ||
+    (msg.includes('violates') && msg.includes('policy'))
+  ) {
+    if (operacao === 'criar') {
+      return 'Conta sem permissão de professor. No Supabase, rode: update public.perfis set papel = \'professor\' where email = \'SEU_EMAIL\';';
+    }
+  }
+
+  if (msg.includes('permission denied')) {
+    return 'Permissão negada nas tabelas de turma. Execute novamente supabase/turmas-professor.sql (inclui GRANT).';
+  }
+
+  return mensagem;
+}
+
 export function gerarCodigoTurma(): string {
   let codigo = '';
   for (let i = 0; i < 6; i++) {
@@ -26,10 +53,7 @@ export async function listarTurmasProfessor(professorId: string): Promise<{
     .order('criado_em', { ascending: false });
 
   if (error) {
-    if (error.message.includes('turmas') || error.message.includes('does not exist')) {
-      return { turmas: [], erro: 'Modo turma não configurado. Execute supabase/turmas-professor.sql.' };
-    }
-    return { turmas: [], erro: error.message };
+    return { turmas: [], erro: mensagemErroTurmas(error.message, 'listar') };
   }
 
   const turmas = data ?? [];
@@ -67,7 +91,7 @@ export async function criarTurma(
       return { turma: { ...data, total_alunos: 0 }, erro: null };
     }
     if (error && !error.message.includes('duplicate') && !error.message.includes('unique')) {
-      return { turma: null, erro: error.message };
+      return { turma: null, erro: mensagemErroTurmas(error.message, 'criar') };
     }
   }
 
