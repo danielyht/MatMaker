@@ -31,7 +31,7 @@ export const SETORES_LABORATORIO: SetorLaboratorio[] = [
     rota: '/space-position',
     icone: Rocket,
     cor: '#8b5cf6',
-    top: '10%',
+    top: '12%',
     left: '50%',
   },
   {
@@ -42,8 +42,8 @@ export const SETORES_LABORATORIO: SetorLaboratorio[] = [
     rota: '/fractions',
     icone: Cookie,
     cor: '#fb923c',
-    top: '38%',
-    left: '18%',
+    top: '36%',
+    left: '22%',
   },
   {
     slug: 'dobro',
@@ -53,7 +53,7 @@ export const SETORES_LABORATORIO: SetorLaboratorio[] = [
     rota: '/dobro',
     icone: Apple,
     cor: '#22c55e',
-    top: '38%',
+    top: '36%',
     left: '50%',
   },
   {
@@ -64,8 +64,8 @@ export const SETORES_LABORATORIO: SetorLaboratorio[] = [
     rota: '/potencias-quadrado',
     icone: Zap,
     cor: '#7c3aed',
-    top: '38%',
-    left: '82%',
+    top: '36%',
+    left: '78%',
   },
   {
     slug: 'desafio-mercado',
@@ -75,8 +75,8 @@ export const SETORES_LABORATORIO: SetorLaboratorio[] = [
     rota: '/desafio-mercado',
     icone: ShoppingBag,
     cor: '#059669',
-    top: '72%',
-    left: '32%',
+    top: '70%',
+    left: '34%',
   },
   {
     slug: 'material-dourado',
@@ -86,7 +86,7 @@ export const SETORES_LABORATORIO: SetorLaboratorio[] = [
     rota: '/material-dourado',
     icone: Layers3,
     cor: '#d97706',
-    top: '72%',
-    left: '68%',
+    top: '70%',
+    left: '66%',
   },
 ];

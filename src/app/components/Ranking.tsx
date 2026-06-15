@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { CalendarDays, ChevronLeft, RefreshCw, Trophy, Users } from 'lucide-react';
+import { CalendarDays, ChevronLeft, LayoutList, RefreshCw, Trophy, Users, BarChart3 } from 'lucide-react';
 import { MathSymbolsBackground } from './MathSymbolsBackground';
 import { MatMakerLogo } from './MatMakerLogo';
 import { AvatarRanking } from './AvatarRanking';
@@ -20,9 +20,12 @@ import { rotuloSemanaAtual } from '../../lib/semanaRanking';
 import { COR_SUCESSO } from '../constants/matmakerBrand';
 import { obterLigaPorPontos, LIGAS_RANKING, type LigaId } from '../constants/ligasRanking';
 import { BadgeLiga, IconeLiga } from './BadgeLiga';
+import { PodioRanking } from './PodioRanking';
 import { cn } from './ui/utils';
 
 const MEDALHAS = ['🥇', '🥈', '🥉'] as const;
+
+type VisualizacaoRanking = 'lista' | 'podio';
 
 const ABAS: { id: ModoRanking; rotulo: string }[] = [
   { id: 'geral', rotulo: 'Geral' },
@@ -56,6 +59,7 @@ export function Ranking() {
   const [dadosCompletos, setDadosCompletos] = useState<EntradaRankingCompleta[]>([]);
   const [semanaAtual, setSemanaAtual] = useState('');
   const [modo, setModo] = useState<ModoRanking>('geral');
+  const [visualizacao, setVisualizacao] = useState<VisualizacaoRanking>('podio');
   const [ligaSelecionada, setLigaSelecionada] = useState<LigaId>('bronze');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -101,6 +105,8 @@ export function Ranking() {
   const minhaPosicao = meuId ? listaExibida.findIndex((e) => e.id === meuId) + 1 : 0;
   const ligaAtual = perfil ? obterLigaPorPontos(perfil.pontos) : LIGAS_RANKING[0];
   const tituloLista = tituloModoRanking(modo, ligaSelecionada);
+  const topTres = listaExibida.slice(0, 3);
+  const restanteLista = visualizacao === 'podio' ? listaExibida.slice(3) : listaExibida;
 
   return (
     <div className="relative min-h-[100dvh] overflow-x-hidden bg-[#EBF4FA] text-[#1E40AF]">
@@ -204,13 +210,61 @@ export function Ranking() {
               Semana {rotuloSemanaAtual(semanaAtual)} — pontos ganhos neste período
             </p>
           )}
+
+          <div
+            className="mt-3 flex gap-1 rounded-2xl bg-[#1E40AF]/5 p-1"
+            role="tablist"
+            aria-label="Visualização do ranking"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={visualizacao === 'podio'}
+              onClick={() => setVisualizacao('podio')}
+              className={cn(
+                'flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-all sm:text-sm',
+                visualizacao === 'podio'
+                  ? 'bg-white text-[#1E40AF] shadow-sm'
+                  : 'text-[#1E40AF]/55 active:bg-white/50',
+              )}
+            >
+              <BarChart3 className="h-3.5 w-3.5" />
+              Pódio
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={visualizacao === 'lista'}
+              onClick={() => setVisualizacao('lista')}
+              className={cn(
+                'flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-all sm:text-sm',
+                visualizacao === 'lista'
+                  ? 'bg-white text-[#1E40AF] shadow-sm'
+                  : 'text-[#1E40AF]/55 active:bg-white/50',
+              )}
+            >
+              <LayoutList className="h-3.5 w-3.5" />
+              Lista
+            </button>
+          </div>
         </div>
+
+        {visualizacao === 'podio' && !carregando && !erro && listaExibida.length > 0 && (
+          <PodioRanking
+            topTres={topTres}
+            dadosCompletos={dadosCompletos}
+            modo={modo}
+            meuId={meuId}
+          />
+        )}
 
         <div className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-4">
           <div className="mb-3 flex items-center gap-2 px-1 sm:mb-4">
             <Users className="h-4 w-4 text-[#3498DB]" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-[#1E40AF]/80">
-              {tituloLista}
+              {visualizacao === 'podio' && restanteLista.length > 0
+                ? 'Demais colocados'
+                : tituloLista}
             </h2>
           </div>
 
@@ -246,12 +300,18 @@ export function Ranking() {
                   : 'Complete missões para ganhar pontos.'}
               </p>
             </div>
+          ) : visualizacao === 'podio' && restanteLista.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 py-6 text-center">
+              <p className="text-sm font-medium text-[#1E40AF]/60">
+                O pódio está completo — só os três primeiros por enquanto.
+              </p>
+            </div>
           ) : (
             <ul className="flex-1 space-y-2 overflow-y-auto pr-0.5 sm:space-y-2.5">
-              {listaExibida.map((entrada, indice) => {
-                const posicao = indice + 1;
+              {restanteLista.map((entrada, indice) => {
+                const posicao = visualizacao === 'podio' ? indice + 4 : indice + 1;
                 const ehEu = entrada.id === meuId;
-                const topTres = posicao <= 3;
+                const noTopTres = posicao <= 3;
                 const liga =
                   modo === 'semanal'
                     ? ligaAtual
@@ -267,13 +327,13 @@ export function Ranking() {
                       ehEu
                         ? 'border-[#FF8C00]/40 bg-white/95 ring-2 ring-[#FF8C00]/45'
                         : 'border-white/60 bg-white/70',
-                      topTres && !ehEu && 'shadow-sm',
+                      noTopTres && !ehEu && 'shadow-sm',
                     )}
                   >
                     <span
                       className={cn(
                         'flex h-8 w-8 shrink-0 items-center justify-center font-bold sm:h-9 sm:w-9',
-                        topTres ? 'text-xl' : 'text-sm text-[#1E40AF]/65',
+                        noTopTres ? 'text-xl' : 'text-sm text-[#1E40AF]/65',
                       )}
                     >
                       {posicaoLabel(posicao)}
@@ -284,7 +344,7 @@ export function Ranking() {
                         nome={entrada.nome}
                         fotoUrl={entrada.foto_url}
                         destaque={ehEu}
-                        tamanho={topTres || ehEu ? 'md' : 'sm'}
+                        tamanho={noTopTres || ehEu ? 'md' : 'sm'}
                       />
                       {modo !== 'semanal' && (
                         <IconeLiga
@@ -317,7 +377,7 @@ export function Ranking() {
 
                     <p
                       className="shrink-0 text-base font-bold tabular-nums sm:text-lg"
-                      style={{ color: topTres ? COR_SUCESSO : liga.cor }}
+                      style={{ color: noTopTres ? COR_SUCESSO : liga.cor }}
                     >
                       {entrada.pontos}
                       <span className="ml-0.5 text-[10px] font-semibold text-[#1E40AF]/45">
