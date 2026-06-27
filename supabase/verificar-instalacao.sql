@@ -25,7 +25,9 @@ from (
     ('missoes_concluidas', 'supabase/missoes-concluidas.sql'),
     ('pontos_semana', 'supabase/ranking-semanal.sql'),
     ('semana_ref', 'supabase/ranking-semanal.sql'),
-    ('papel', 'supabase/turmas-professor.sql')
+    ('papel', 'supabase/turmas-professor.sql'),
+    ('instituicao', 'supabase/perfis-professor-campos.sql'),
+    ('materia', 'supabase/perfis-professor-campos.sql')
 ) as t(coluna, script)
 order by item;
 

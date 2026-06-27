@@ -1,0 +1,29 @@
+<svg width="90" height="100" viewBox="0 0 90 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="70" y="20" width="70" height="50" transform="rotate(90 70 20)" fill="#C84646"/>
+<rect x="10" y="30" width="70" height="50" fill="#C84646"/>
+<rect y="40" width="90" height="35" fill="#C84646"/>
+<rect x="20" y="100" width="80" height="40" transform="rotate(-90 20 100)" fill="#C84646"/>
+<rect x="40" y="20" width="10" height="10" fill="#4C3B29"/>
+<rect x="30" y="20" width="10" height="10" fill="#439855"/>
+<rect x="50" y="90" width="10" height="10" fill="#951B1B"/>
+<rect x="60" y="80" width="10" height="10" fill="#951B1B"/>
+<rect x="60" y="90" width="10" height="10" fill="#951B1B"/>
+<rect x="40" y="90" width="10" height="10" fill="#951B1B"/>
+<rect x="70" y="80" width="10" height="10" fill="#439855"/>
+<rect x="70" y="70" width="10" height="10" fill="#951B1B"/>
+<rect x="80" y="70" width="10" height="10" fill="#951B1B"/>
+<rect x="80" y="60" width="10" height="10" fill="#951B1B"/>
+<rect x="50" y="20" width="10" height="10" fill="#951B1B"/>
+<rect x="70" y="30" width="10" height="10" fill="#951B1B"/>
+<rect y="70" width="10" height="10" fill="#C84646"/>
+<path d="M20 10H30V20H20V10Z" fill="#439855"/>
+<rect x="30" y="10" width="10" height="10" fill="#439855"/>
+<rect x="40" y="10" width="10" height="10" fill="#4C3B29"/>
+<rect x="50" width="10" height="10" fill="#4C3B29"/>
+<rect x="10" y="80" width="10" height="10" fill="#C84646"/>
+<rect x="70" y="80" width="10" height="10" fill="#951B1B"/>
+<rect x="20" y="40" width="20" height="20" fill="#F5A4A4"/>
+<rect x="40" y="40" width="10" height="10" fill="#F5A4A4"/>
+<rect x="10" y="50" width="10" height="10" fill="#F5A4A4"/>
+<rect x="20" y="60" width="10" height="10" fill="#F5A4A4"/>
+</svg>

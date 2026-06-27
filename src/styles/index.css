@@ -2,49 +2,162 @@
 @import './tailwind.css';
 @import './theme.css';
 
-/** Flutuação suave — landing zero gravidade (símbolos e cards decorativos). */
-@keyframes zero-gravity-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-14px);
-  }
-}
+/**
+ * MatMaker — utilitários globais
+ *
+ * glass-panel  → card elevado (dashboard, headers flutuantes)
+ * stage-panel  → card interativo (botões de missão, stats)
+ * auth-card    → formulário de autenticação (login, cadastro)
+ * btn-primary  → botão CTA primário
+ * btn-secondary→ botão outline
+ * btn-ghost    → botão sem borda
+ * form-input   → campos de formulário
+ */
 
-.zero-gravity-float {
-  animation: zero-gravity-float 7s ease-in-out infinite;
-}
-
-.zero-gravity-float-slow {
-  animation: zero-gravity-float 10s ease-in-out infinite;
-}
-
-.zero-gravity-float-delayed {
-  animation: zero-gravity-float 8.5s ease-in-out infinite;
-  animation-delay: var(--zg-delay, 0s);
-}
-
-/** Painéis flutuantes com vidro — dashboard / laboratório */
 @layer utilities {
+  /* ── Painéis ── */
+
+  /* Level 1 — headers flutuantes, containers de fundo */
   .glass-panel {
-    border-radius: 1.5rem;
-    border: 1px solid rgb(255 255 255 / 0.65);
-    background: rgb(255 255 255 / 0.72);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow:
-      0 8px 32px -8px rgb(52 152 219 / 0.18),
-      0 2px 8px rgb(30 64 175 / 0.06);
+    border-radius: var(--radius-xl, 1.125rem);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: var(--shadow-sm, 0 1px 3px 0 rgb(15 23 42 / 0.07));
   }
 
+  /* Level 2 — cards de missão, seções interativas */
   .stage-panel {
-    border-radius: 1.5rem;
-    border: 1px solid rgb(255 255 255 / 0.9);
-    background: rgb(255 255 255 / 0.92);
-    box-shadow:
-      0 16px 48px -12px rgb(52 152 219 / 0.22),
-      0 4px 16px rgb(30 64 175 / 0.08);
+    border-radius: var(--radius-xl, 1.125rem);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: var(--shadow-md, 0 4px 12px -2px rgb(15 23 42 / 0.09));
+  }
+
+  /* Level 3 — modais, drawers */
+  .modal-panel {
+    border-radius: var(--radius-xl, 1.125rem);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: var(--shadow-xl, 0 20px 48px -8px rgb(15 23 42 / 0.14));
+  }
+
+  /* Auth card (login / cadastro) */
+  .auth-card {
+    border-radius: 1.25rem;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: var(--shadow-lg, 0 10px 28px -4px rgb(15 23 42 / 0.12));
+  }
+
+  /* ── Botões ── */
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0 1.5rem;
+    border-radius: calc(var(--radius) - 2px);
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    box-shadow: 0 1px 3px 0 rgb(29 78 216 / 0.25), 0 1px 2px -1px rgb(29 78 216 / 0.15);
+    cursor: pointer;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: #1E40AF;
+    box-shadow: 0 4px 12px -2px rgb(29 78 216 / 0.35), 0 2px 4px -1px rgb(29 78 216 / 0.2);
+  }
+  .btn-primary:active:not(:disabled) {
+    background-color: #1E3A8A;
+  }
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0 1.5rem;
+    border-radius: calc(var(--radius) - 2px);
+    background-color: transparent;
+    border: 1.5px solid #CBD5E1;
+    color: #1D4ED8;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: #EFF6FF;
+    border-color: #93C5FD;
+  }
+  .btn-secondary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: calc(var(--radius) - 2px);
+    background-color: transparent;
+    color: #1D4ED8;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background-color 0.15s ease;
+    cursor: pointer;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: #EFF6FF;
+  }
+  .btn-ghost:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* ── Inputs ── */
+  .form-input {
+    width: 100%;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1.5px solid #CBD5E1;
+    background-color: #FFFFFF;
+    padding: 0.6875rem 1rem;
+    color: #0F172A;
+    font-size: 0.9375rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .form-input::placeholder {
+    color: #94A3B8;
+  }
+  .form-input:focus {
+    border-color: #1D4ED8;
+    box-shadow: 0 0 0 3px rgb(29 78 216 / 0.12);
+  }
+  .form-input:disabled {
+    opacity: 0.55;
+    background-color: #F8FAFC;
+    cursor: not-allowed;
+  }
+
+  /* ── Badge de liga / pill ── */
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
   }
 }

@@ -21,27 +21,27 @@ export function ConquistasPage() {
   if (carregando || !autenticado) return null;
 
   return (
-    <div className="relative min-h-[100dvh] overflow-x-hidden bg-[#EBF4FA] text-[#1E40AF]">
-      <MathSymbolsBackground opacity={0.04} />
+    <div className="relative min-h-[100dvh] overflow-x-hidden bg-[#EEF5FF]">
+      <MathSymbolsBackground opacity={0.03} animated={false} />
 
       <div className="relative z-10 m-3 flex min-h-[calc(100dvh-1.5rem)] flex-col gap-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:m-4 sm:gap-4">
-        <header className="glass-panel flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
+        <header className="glass-panel flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
           <button
             type="button"
             onClick={() => navegar('/dashboard')}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/90 text-[#1E40AF] shadow-sm transition-transform hover:scale-105 active:scale-95"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] shadow-sm transition-colors hover:bg-[#EFF6FF] hover:text-[#1D4ED8] active:scale-95"
             aria-label="Voltar ao laboratório"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </button>
-          <MatMakerLogo className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
+          <MatMakerLogo className="h-9 w-9 shrink-0" />
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold leading-tight sm:text-2xl">Conquistas</h1>
-            <p className="mt-0.5 text-sm text-[#1E40AF]/70">
+            <h1 className="text-lg font-bold leading-tight text-[#0F172A] sm:text-xl">Conquistas</h1>
+            <p className="mt-0.5 text-xs text-[#64748B]">
               {totalConquistas} de {totalPossivel} desbloqueadas
             </p>
           </div>
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF8C00] to-[#3498DB] shadow-md">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EA580C] shadow-sm">
             <Award className="h-5 w-5 text-white" />
           </div>
         </header>

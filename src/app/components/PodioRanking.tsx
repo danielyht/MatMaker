@@ -20,7 +20,7 @@ const ORDEM_PODIO: (1 | 2 | 3)[] = [2, 1, 3];
 
 const ESTILO_COLUNA: Record<
   1 | 2 | 3,
-  { altura: string; largura: string; cor: string; corBarra: string; medalha: string }
+  { altura: string; largura: string; cor: string; corBarra: string; medalha: string; medalhaImg: string }
 > = {
   1: {
     altura: 'h-28 sm:h-36',
@@ -28,6 +28,7 @@ const ESTILO_COLUNA: Record<
     cor: 'from-[#FFD700]/90 to-[#FF8C00]',
     corBarra: 'bg-gradient-to-t from-[#FF8C00] to-[#FFD700]',
     medalha: '🥇',
+    medalhaImg: '/medals/gold.svg',
   },
   2: {
     altura: 'h-20 sm:h-28',
@@ -35,6 +36,7 @@ const ESTILO_COLUNA: Record<
     cor: 'from-[#E8E8E8] to-[#C0C0C0]',
     corBarra: 'bg-gradient-to-t from-[#A8A8A8] to-[#E8E8E8]',
     medalha: '🥈',
+    medalhaImg: '/medals/silver.svg',
   },
   3: {
     altura: 'h-16 sm:h-24',
@@ -42,6 +44,7 @@ const ESTILO_COLUNA: Record<
     cor: 'from-[#E8A86B] to-[#CD7F32]',
     corBarra: 'bg-gradient-to-t from-[#B87333] to-[#E8A86B]',
     medalha: '🥉',
+    medalhaImg: '/medals/bronze.svg',
   },
 };
 
@@ -78,13 +81,17 @@ function SlotPodio({
   if (!entrada) {
     return (
       <div className={cn('flex flex-col items-center', estilo.largura)}>
-        <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-[#1E40AF]/15 bg-white/40 sm:h-20 sm:w-20">
-          <span className="text-2xl opacity-30">{estilo.medalha}</span>
+        <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-[#CBD5E1] bg-[#F1F5F9] sm:h-20 sm:w-20">
+          <img
+            src={estilo.medalhaImg}
+            alt={`${posicao}º lugar`}
+            className="h-9 w-9 opacity-25 sm:h-11 sm:w-11"
+          />
         </div>
-        <p className="mb-2 text-center text-xs font-medium text-[#1E40AF]/35">—</p>
+        <p className="mb-2 text-center text-xs font-medium text-[#94A3B8]">—</p>
         <div
           className={cn(
-            'w-full rounded-t-2xl border border-white/50 bg-[#1E40AF]/5',
+            'w-full rounded-t-2xl border border-[#E2E8F0] bg-[#F1F5F9]',
             estilo.altura,
           )}
         />
@@ -112,22 +119,26 @@ function SlotPodio({
           tamanho={posicao === 1 ? 'lg' : 'md'}
         />
         <span
-          className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm shadow-md sm:h-7 sm:w-7 sm:text-base"
+          className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-md sm:h-8 sm:w-8"
           aria-hidden
         >
-          {estilo.medalha}
+          <img
+            src={estilo.medalhaImg}
+            alt={`${posicao}º lugar`}
+            className="h-5 w-5 sm:h-6 sm:w-6"
+          />
         </span>
       </div>
 
       <p
         className={cn(
-          'mb-1 max-w-full truncate text-center text-xs font-bold sm:text-sm',
-          ehEu && 'text-[#FF8C00]',
+          'mb-1 max-w-full truncate text-center text-xs font-bold text-[#0F172A] sm:text-sm',
+          ehEu && 'text-[#EA580C]',
         )}
         title={entrada.nome}
       >
         {entrada.nome.split(' ')[0]}
-        {ehEu ? <span className="block text-[10px] font-semibold text-[#FF8C00]/80">você</span> : null}
+        {ehEu ? <span className="block text-[10px] font-semibold text-[#EA580C]/80">você</span> : null}
       </p>
 
       <BadgeLiga liga={liga} tamanho="sm" className="mb-2 max-w-full scale-90 sm:scale-100" />
@@ -147,7 +158,7 @@ function SlotPodio({
           <span className="block text-[9px] font-bold uppercase opacity-90">{sufixoPts}</span>
         </p>
         <span
-          className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-black text-[#1E40AF] shadow-sm"
+          className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-[#1D4ED8] shadow-sm"
         >
           {posicao}º
         </span>
@@ -163,7 +174,7 @@ export function PodioRanking({ topTres, dadosCompletos, modo, meuId }: PodioRank
 
   return (
     <div className="glass-panel overflow-hidden p-4 sm:p-5">
-      <p className="mb-3 text-center text-xs font-bold uppercase tracking-wide text-[#1E40AF]/60 sm:mb-4">
+      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-[#94A3B8] sm:mb-4">
         Pódio — top 3
       </p>
       <div className="flex items-end justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0">
@@ -178,7 +189,7 @@ export function PodioRanking({ topTres, dadosCompletos, modo, meuId }: PodioRank
         ))}
       </div>
       {topTres.length === 1 && (
-        <p className="mt-3 text-center text-xs text-[#1E40AF]/50">
+        <p className="mt-3 text-center text-xs text-[#94A3B8]">
           Seja o próximo a subir no pódio!
         </p>
       )}

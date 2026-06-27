@@ -2,66 +2,41 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { AuthApiError } from '@supabase/supabase-js';
 import { AuthPageShell } from './AuthPageShell';
-import { COR_PRIMARIA, COR_SUCESSO } from '../constants/matmakerBrand';
 import { urlRedefinirSenha } from '../../lib/authRedirect';
 import { supabase, supabaseConfigurado } from '../../lib/supabaseClient';
 import { traduzirErroAuth } from '../../lib/traduzirErroAuth';
 
-const inputClass =
-  'w-full rounded-2xl border border-[#3498DB]/25 bg-white/90 px-4 py-3 text-[#1E40AF] outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:opacity-60';
-
 export function EsqueciSenha() {
   const [email, setEmail] = useState('');
   const [carregando, setCarregando] = useState(false);
-  const [mensagem, setMensagem] = useState<{ tipo: 'erro' | 'sucesso'; texto: string } | null>(
-    null,
-  );
+  const [mensagem, setMensagem] = useState<{ tipo: 'erro' | 'sucesso'; texto: string } | null>(null);
 
   async function enviarLink(evento: FormEvent) {
     evento.preventDefault();
     setMensagem(null);
 
     const emailTrim = email.trim().toLowerCase();
-
-    if (!emailTrim) {
-      setMensagem({ tipo: 'erro', texto: 'Informe seu e-mail.' });
-      return;
-    }
+    if (!emailTrim) { setMensagem({ tipo: 'erro', texto: 'Informe seu e-mail.' }); return; }
 
     if (!supabaseConfigurado() || !supabase) {
-      setMensagem({
-        tipo: 'erro',
-        texto: 'Supabase não configurado. Adicione as variáveis VITE_SUPABASE_* no arquivo .env.',
-      });
+      setMensagem({ tipo: 'erro', texto: 'Supabase não configurado. Adicione as variáveis VITE_SUPABASE_* no arquivo .env.' });
       return;
     }
 
     setCarregando(true);
-
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(emailTrim, {
-        redirectTo: urlRedefinirSenha(),
-      });
-
+      const { error } = await supabase.auth.resetPasswordForEmail(emailTrim, { redirectTo: urlRedefinirSenha() });
       if (error) {
-        const texto =
-          error instanceof AuthApiError
-            ? traduzirErroAuth(error, 'recuperacao')
-            : error.message;
+        const texto = error instanceof AuthApiError ? traduzirErroAuth(error, 'recuperacao') : error.message;
         setMensagem({ tipo: 'erro', texto });
         return;
       }
-
       setMensagem({
         tipo: 'sucesso',
-        texto:
-          'Se existir uma conta com este e-mail, enviamos um link para redefinir a senha. Verifique a caixa de entrada e o spam.',
+        texto: 'Se existir uma conta com este e-mail, enviamos um link para redefinir a senha. Verifique a caixa de entrada e o spam.',
       });
     } catch {
-      setMensagem({
-        tipo: 'erro',
-        texto: 'Erro inesperado. Verifique sua conexão e tente novamente.',
-      });
+      setMensagem({ tipo: 'erro', texto: 'Erro inesperado. Verifique sua conexão e tente novamente.' });
     } finally {
       setCarregando(false);
     }
@@ -77,10 +52,10 @@ export function EsqueciSenha() {
       {mensagem && (
         <div
           role="alert"
-          className={`mb-5 rounded-2xl border px-4 py-3 text-sm font-medium ${
+          className={`mb-5 rounded-xl border px-4 py-3 text-sm font-medium ${
             mensagem.tipo === 'erro'
-              ? 'border-red-200 bg-red-50 text-red-800'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-green-200 bg-green-50 text-green-700'
           }`}
         >
           {mensagem.texto}
@@ -89,7 +64,7 @@ export function EsqueciSenha() {
 
       <form onSubmit={enviarLink} className="space-y-5">
         <div>
-          <label htmlFor="recuperar-email" className="mb-1.5 block text-sm font-semibold text-[#1E40AF]">
+          <label htmlFor="recuperar-email" className="mb-1.5 block text-sm font-semibold text-[#0F172A]">
             E-mail <span className="text-red-500">*</span>
           </label>
           <input
@@ -100,7 +75,7 @@ export function EsqueciSenha() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={carregando}
-            className={inputClass}
+            className="form-input"
             placeholder="voce@email.com"
           />
         </div>
@@ -108,16 +83,15 @@ export function EsqueciSenha() {
         <button
           type="submit"
           disabled={carregando}
-          className="w-full rounded-2xl px-6 py-4 text-lg font-bold text-white shadow-[0_12px_32px_-6px_rgba(255,140,0,0.55)] transition-all duration-300 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
-          style={{ backgroundColor: COR_SUCESSO }}
+          className="w-full rounded-xl bg-[#EA580C] px-6 py-3 text-base font-semibold text-white shadow-[0_4px_14px_-2px_rgb(234_88_12_/_0.3)] transition-colors hover:bg-[#C2410C] active:bg-[#9A3412] disabled:cursor-not-allowed disabled:opacity-55"
         >
           {carregando ? 'Enviando link…' : 'Enviar link de recuperação'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#1E40AF]/70">
+      <p className="mt-6 text-center text-sm text-[#64748B]">
         Lembrou a senha?{' '}
-        <Link to="/login" className="font-semibold hover:underline" style={{ color: COR_PRIMARIA }}>
+        <Link to="/login" className="font-semibold text-[#1D4ED8] hover:underline">
           Entrar
         </Link>
       </p>

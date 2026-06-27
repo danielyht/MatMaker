@@ -61,41 +61,41 @@ export function EntrarTurma() {
   }
 
   return (
-    <div className="relative min-h-[100dvh] overflow-x-hidden bg-[#EBF4FA] text-[#1E40AF]">
-      <MathSymbolsBackground opacity={0.04} />
+    <div className="relative min-h-[100dvh] overflow-x-hidden bg-[#EEF5FF]">
+      <MathSymbolsBackground opacity={0.03} animated={false} />
 
       <div className="relative z-10 m-3 flex min-h-[calc(100dvh-1.5rem)] flex-col gap-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:m-4 sm:gap-4">
-        <header className="glass-panel flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
+        <header className="glass-panel flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
           <button
             type="button"
             onClick={() => navegar('/dashboard')}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/90 shadow-sm"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] shadow-sm transition-colors hover:bg-[#EFF6FF] hover:text-[#1D4ED8] active:scale-95"
             aria-label="Voltar ao laboratório"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </button>
-          <MatMakerLogo className="h-10 w-10 shrink-0" />
+          <MatMakerLogo className="h-9 w-9 shrink-0" />
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold">Entrar na turma</h1>
-            <p className="text-sm text-[#1E40AF]/70">Digite o código que o professor passou</p>
+            <h1 className="text-lg font-bold text-[#0F172A]">Entrar na turma</h1>
+            <p className="text-xs text-[#64748B]">Digite o código que o professor passou</p>
           </div>
         </header>
 
         <div className="glass-panel p-5 sm:p-6">
           <form onSubmit={handleEntrar} className="mx-auto max-w-md space-y-4">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#3498DB]/15">
-              <KeyRound className="h-7 w-7 text-[#3498DB]" />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#EFF6FF]">
+              <KeyRound className="h-6 w-6 text-[#1D4ED8]" />
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold">Código da turma (6 caracteres)</span>
+              <span className="mb-2 block text-sm font-semibold text-[#0F172A]">Código da turma (6 caracteres)</span>
               <input
                 type="text"
                 value={codigo}
                 onChange={(e) => setCodigo(formatarCodigoTurma(e.target.value))}
                 placeholder="ABC123"
                 maxLength={6}
-                className="w-full rounded-2xl border border-white/80 bg-white px-4 py-3 text-center font-mono text-2xl font-black tracking-[0.3em] uppercase shadow-sm outline-none focus:ring-2 focus:ring-[#3498DB]/40"
+                className="w-full rounded-xl border border-[#CBD5E1] bg-white px-4 py-3 text-center font-mono text-2xl font-black tracking-[0.3em] text-[#1D4ED8] uppercase outline-none transition-shadow focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/15"
                 autoComplete="off"
                 spellCheck={false}
               />
@@ -104,17 +104,17 @@ export function EntrarTurma() {
             <button
               type="submit"
               disabled={enviando || codigo.length < 6}
-              className="min-h-12 w-full rounded-2xl bg-[#3498DB] text-base font-bold text-white shadow-md disabled:opacity-50"
+              className="btn-primary min-h-12 w-full"
             >
               {enviando ? 'Entrando…' : 'Entrar na turma'}
             </button>
 
             {mensagem && (
               <p
-                className={`rounded-xl px-3 py-2 text-center text-sm font-medium ${
+                className={`rounded-xl border px-3 py-2 text-center text-sm font-medium ${
                   mensagem.tipo === 'erro'
-                    ? 'bg-red-50 text-red-700'
-                    : 'bg-emerald-50 text-emerald-800'
+                    ? 'border-red-200 bg-red-50 text-red-700'
+                    : 'border-green-200 bg-green-50 text-green-700'
                 }`}
               >
                 {mensagem.texto}
@@ -126,8 +126,8 @@ export function EntrarTurma() {
         {turmas.length > 0 && (
           <div className="glass-panel flex-1 p-4 sm:p-5">
             <div className="mb-3 flex items-center gap-2">
-              <Users className="h-4 w-4 text-[#3498DB]" />
-              <h2 className="text-sm font-bold uppercase tracking-wide text-[#1E40AF]/80">
+              <Users className="h-4 w-4 text-[#1D4ED8]" />
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                 Minhas turmas
               </h2>
             </div>
@@ -135,7 +135,7 @@ export function EntrarTurma() {
               {turmas.map((turma) => (
                 <li
                   key={turma.id}
-                  className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 text-sm font-semibold"
+                  className="rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A]"
                 >
                   {turma.nome}
                 </li>

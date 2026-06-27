@@ -91,12 +91,12 @@ export function MathSymbolsBackground({
       {simbolos.map((s, i) => (
         <span
           key={`${s.char}-${i}-${s.className}`}
-          className={`absolute font-bold text-[#1E40AF] ${animated ? 'zero-gravity-float-delayed' : ''} ${s.className}`}
+          className={`absolute font-bold text-[#1D4ED8] ${animated ? 'hero-float-delayed' : ''} ${s.className}`}
           style={
             {
               opacity,
-              '--zg-delay': `${(i % 11) * 0.25}s`,
-              animationDuration: `${5.5 + (i % 7)}s`,
+              '--hf-delay': `${(i % 11) * 0.35}s`,
+              animationDuration: `${7 + (i % 6)}s`,
             } as CSSProperties
           }
         >

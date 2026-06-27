@@ -251,9 +251,13 @@ function CaixaOvos({ quantidade }: { quantidade: number }) {
       <p className="mb-2 text-center text-xs font-semibold text-amber-900/80">Caixa de ovos</p>
       <div className="flex flex-wrap justify-center gap-2">
         {Array.from({ length: quantidade }).map((_, i) => (
-          <span key={i} className="text-2xl sm:text-3xl" role="img" aria-hidden>
-            🥚
-          </span>
+          <img
+            key={i}
+            src="/egg.svg"
+            alt=""
+            aria-hidden
+            className="h-8 w-8 rotate-180 sm:h-9 sm:w-9"
+          />
         ))}
       </div>
     </div>
@@ -291,7 +295,7 @@ function GradeMacasSelecionavel({
               type="button"
               disabled={disabled}
               onClick={() => onToggle(i)}
-              className={`flex h-10 w-full min-h-10 touch-manipulation items-center justify-center rounded-lg border-2 text-xl transition-transform active:scale-95 sm:h-11 sm:text-2xl ${
+              className={`flex h-10 w-full min-h-10 touch-manipulation items-center justify-center rounded-lg border-2 transition-transform active:scale-95 sm:h-11 ${
                 ativa
                   ? 'border-red-600 bg-red-50 shadow-inner ring-2 ring-red-400/50'
                   : 'border-emerald-200/80 bg-emerald-50/50 hover:bg-emerald-100/80'
@@ -299,7 +303,12 @@ function GradeMacasSelecionavel({
               aria-pressed={ativa}
               aria-label={ativa ? `Maçã ${i + 1} marcada` : `Maçã ${i + 1} não marcada`}
             >
-              <span aria-hidden>{ativa ? '🍎' : '🍏'}</span>
+              <img
+                src={ativa ? '/apple-selected.svg' : '/apple-unselected.svg'}
+                alt=""
+                aria-hidden
+                className="h-6 w-6 sm:h-7 sm:w-7"
+              />
             </button>
           );
         })}

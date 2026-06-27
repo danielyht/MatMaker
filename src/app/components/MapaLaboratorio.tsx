@@ -16,43 +16,49 @@ export function MapaLaboratorio({ missoesConcluidas }: MapaLaboratorioProps) {
 
   return (
     <section className="glass-panel overflow-hidden p-3 sm:p-4 md:p-5">
+      {/* Cabeçalho */}
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2 px-1 sm:mb-4">
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-bold sm:text-xl">Mapa do laboratório</h2>
-          <p className="mt-0.5 text-sm text-[#1E40AF]/70">
-            Complete missões para acender cada setor
-          </p>
+          <h2 className="text-base font-bold text-[#0F172A] sm:text-lg">Mapa do laboratório</h2>
+          <p className="mt-0.5 text-xs text-[#64748B]">Complete missões para acender cada setor</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-white/80 bg-white/90 px-3 py-1.5 text-sm font-semibold text-[#1E40AF] shadow-sm">
-          <Sparkles className="h-4 w-4 text-[#FF8C00]" />
-          <span>
-            {totalAceso}/{TOTAL_MISSOES} setores
-          </span>
+        <div className="flex shrink-0 items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] shadow-sm">
+          <Sparkles className="h-3.5 w-3.5 text-[#EA580C]" />
+          <span>{totalAceso}/{TOTAL_MISSOES} setores</span>
         </div>
       </div>
 
-      <div className="relative mx-auto w-full max-w-3xl px-1 sm:px-0">
+      {/*
+        MAPA VISUAL — apenas sm e acima.
+        O container usa aspect-ratio puro, sem min-h, para que os % de posição
+        dos botões sejam sempre calculados sobre a mesma proporção (4:3).
+        overflow-hidden garante que nada vaze para fora.
+      */}
+      <div className="relative mx-auto hidden w-full max-w-3xl sm:block">
         <div
           className={cn(
-            'relative w-full overflow-visible rounded-3xl border border-[#3498DB]/15',
-            'bg-gradient-to-br from-[#dbeafe] via-[#EBF4FA] to-[#e0f2fe] shadow-inner',
-            'min-h-[17.5rem] aspect-[4/5] sm:min-h-0 sm:aspect-[4/3]',
+            'relative w-full overflow-hidden rounded-2xl border border-[#BFDBFE]/40',
+            'bg-gradient-to-br from-[#dbeafe] via-[#EEF5FF] to-[#e0f2fe] shadow-inner',
+            'aspect-[4/3]',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl opacity-40">
-            <div className="absolute left-1/2 top-[26%] h-[46%] w-[68%] -translate-x-1/2 rounded-[2rem] border-2 border-dashed border-[#3498DB]/20 bg-white/30 sm:w-[72%]" />
-            <div className="absolute left-1/2 top-[50%] h-px w-[74%] -translate-x-1/2 bg-[#3498DB]/15 sm:w-[78%]" />
-            <div className="absolute left-1/2 top-[26%] h-[46%] w-px -translate-x-1/2 bg-[#3498DB]/10" />
+          {/* Decoração de fundo */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-40">
+            <div className="absolute left-1/2 top-[26%] h-[46%] w-[70%] -translate-x-1/2 rounded-[2rem] border-2 border-dashed border-[#1D4ED8]/20 bg-white/30" />
+            <div className="absolute left-1/2 top-[50%] h-px w-[76%] -translate-x-1/2 bg-[#1D4ED8]/12" />
+            <div className="absolute left-1/2 top-[26%] h-[46%] w-px -translate-x-1/2 bg-[#1D4ED8]/08" />
           </div>
 
-          <div className="pointer-events-none absolute left-1/2 top-[50%] z-0 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[#3498DB]/25 bg-white/70 shadow-md sm:h-20 sm:w-20">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-[#3498DB]/80 sm:text-xs">
+          {/* Núcleo central */}
+          <div className="pointer-events-none absolute left-1/2 top-[50%] z-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[#1D4ED8]/20 bg-white/80 shadow-md lg:h-20 lg:w-20">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[#1D4ED8]/70 lg:text-[11px]">
               Núcleo
             </span>
           </div>
 
+          {/* Linhas SVG */}
           <svg
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden rounded-3xl"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
             aria-hidden
@@ -77,6 +83,7 @@ export function MapaLaboratorio({ missoesConcluidas }: MapaLaboratorioProps) {
             })}
           </svg>
 
+          {/* Botões dos setores */}
           {SETORES_LABORATORIO.map((setor) => {
             const Icone = setor.icone;
             const aceso = concluidas.has(setor.slug);
@@ -86,35 +93,36 @@ export function MapaLaboratorio({ missoesConcluidas }: MapaLaboratorioProps) {
                 key={setor.slug}
                 type="button"
                 onClick={() => navegar(setor.rota)}
-                className="group absolute z-10 flex min-h-[2.75rem] min-w-[2.75rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 outline-none focus-visible:ring-2 focus-visible:ring-[#3498DB] focus-visible:ring-offset-2 sm:min-h-0 sm:min-w-0 sm:gap-1.5"
+                className="group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8] focus-visible:ring-offset-2"
                 style={{ top: setor.top, left: setor.left }}
                 aria-label={`${setor.nome}${aceso ? ' — concluída' : ''}`}
               >
                 <div className="relative">
                   {aceso && (
                     <span
-                      className="absolute inset-0 animate-ping rounded-2xl opacity-30"
+                      className="absolute inset-0 animate-ping rounded-xl opacity-25"
                       style={{ backgroundColor: setor.cor }}
                     />
                   )}
                   <div
                     className={cn(
-                      'relative flex h-11 w-11 items-center justify-center rounded-xl border-2 shadow-lg transition-all duration-300 sm:h-16 sm:w-16 sm:rounded-2xl',
+                      'relative flex items-center justify-center rounded-xl border-2 shadow-md transition-all duration-300',
+                      'h-11 w-11 lg:h-14 lg:w-14',
                       aceso
                         ? 'scale-105 border-white/90 text-white'
-                        : 'border-white/60 bg-white/75 text-[#1E40AF]/45 grayscale-[0.35]',
+                        : 'border-white/60 bg-white/80 text-[#64748B] grayscale-[0.4]',
                     )}
                     style={{
                       backgroundColor: aceso ? setor.cor : undefined,
                       boxShadow: aceso
-                        ? `0 0 20px ${setor.cor}66, 0 6px 16px ${setor.cor}33`
+                        ? `0 0 16px ${setor.cor}55, 0 4px 12px ${setor.cor}33`
                         : undefined,
                     }}
                   >
-                    <Icone className="h-5 w-5 sm:h-7 sm:w-7" strokeWidth={2.5} />
+                    <Icone className="h-5 w-5 lg:h-6 lg:w-6" strokeWidth={2.5} />
                     {aceso && (
-                      <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-emerald-600 shadow-md sm:-right-1 sm:-top-1 sm:h-5 sm:w-5">
-                        <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3" strokeWidth={3} />
+                      <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm lg:h-5 lg:w-5">
+                        <Check className="h-2.5 w-2.5 lg:h-3 lg:w-3" strokeWidth={3} />
                       </span>
                     )}
                   </div>
@@ -122,14 +130,14 @@ export function MapaLaboratorio({ missoesConcluidas }: MapaLaboratorioProps) {
 
                 <div
                   className={cn(
-                    'hidden max-w-[5.5rem] rounded-xl px-2 py-1 text-center transition-colors sm:block sm:max-w-[6.5rem]',
+                    'max-w-[5rem] rounded-lg px-1.5 py-0.5 text-center transition-colors lg:max-w-[6rem]',
                     aceso ? 'bg-white/90 shadow-sm' : 'bg-white/50',
                   )}
                 >
                   <p
                     className={cn(
-                      'text-[10px] font-bold leading-tight sm:text-xs',
-                      aceso ? 'text-[#1E40AF]' : 'text-[#1E40AF]/55',
+                      'text-[9px] font-bold leading-tight lg:text-[11px]',
+                      aceso ? 'text-[#0F172A]' : 'text-[#64748B]',
                     )}
                   >
                     {setor.setor}
@@ -139,51 +147,83 @@ export function MapaLaboratorio({ missoesConcluidas }: MapaLaboratorioProps) {
             );
           })}
         </div>
+      </div>
 
-        <ul className="mt-3 grid grid-cols-2 gap-2 sm:hidden">
-          {SETORES_LABORATORIO.map((setor) => {
-            const Icone = setor.icone;
-            const aceso = concluidas.has(setor.slug);
-            return (
-              <li key={`legenda-${setor.slug}`}>
-                <button
-                  type="button"
-                  onClick={() => navegar(setor.rota)}
+      {/*
+        GRADE DE NAVEGAÇÃO — mobile (< sm): substitui o mapa visual.
+        Grid 2×3 confiável em qualquer largura de tela.
+      */}
+      <ul className="grid grid-cols-2 gap-2 sm:hidden">
+        {SETORES_LABORATORIO.map((setor) => {
+          const Icone = setor.icone;
+          const aceso = concluidas.has(setor.slug);
+          return (
+            <li key={`grade-${setor.slug}`}>
+              <button
+                type="button"
+                onClick={() => navegar(setor.rota)}
+                className={cn(
+                  'flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all active:scale-[0.97]',
+                  aceso
+                    ? 'border-[#E2E8F0] bg-white shadow-sm'
+                    : 'border-[#E2E8F0] bg-white/70',
+                )}
+              >
+                <span
                   className={cn(
-                    'flex w-full items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors active:scale-[0.98]',
-                    aceso
-                      ? 'border-white/80 bg-white/95 shadow-sm'
-                      : 'border-white/50 bg-white/60',
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white',
+                    !aceso && 'opacity-50 grayscale',
                   )}
+                  style={{ backgroundColor: aceso ? setor.cor : '#94a3b8' }}
                 >
+                  <Icone className="h-4.5 w-4.5 h-[1.125rem] w-[1.125rem]" strokeWidth={2.5} />
+                </span>
+                <span className="min-w-0 flex-1">
                   <span
                     className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white',
-                      !aceso && 'grayscale-[0.35] opacity-70',
+                      'block truncate text-xs font-bold leading-tight',
+                      aceso ? 'text-[#0F172A]' : 'text-[#94A3B8]',
                     )}
-                    style={{ backgroundColor: aceso ? setor.cor : '#94a3b8' }}
                   >
-                    <Icone className="h-4 w-4" strokeWidth={2.5} />
+                    {setor.setor}
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className={cn(
-                        'block truncate text-[11px] font-bold leading-tight',
-                        aceso ? 'text-[#1E40AF]' : 'text-[#1E40AF]/55',
-                      )}
-                    >
-                      {setor.setor}
-                    </span>
-                    {aceso && (
-                      <span className="text-[10px] font-semibold text-emerald-600">Concluída</span>
+                  <span
+                    className={cn(
+                      'block text-[10px] font-medium',
+                      aceso ? 'text-emerald-600' : 'text-[#CBD5E1]',
                     )}
+                  >
+                    {aceso ? 'Concluída' : 'Pendente'}
                   </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Mini-legenda abaixo do mapa — apenas sm+ */}
+      <ul className="mt-3 hidden grid-cols-3 gap-1.5 sm:grid lg:grid-cols-6">
+        {SETORES_LABORATORIO.map((setor) => {
+          const aceso = concluidas.has(setor.slug);
+          return (
+            <li key={`legenda-${setor.slug}`} className="flex items-center gap-1.5">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: aceso ? setor.cor : '#CBD5E1' }}
+              />
+              <span
+                className={cn(
+                  'truncate text-[10px] font-medium',
+                  aceso ? 'text-[#0F172A]' : 'text-[#94A3B8]',
+                )}
+              >
+                {setor.setor}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

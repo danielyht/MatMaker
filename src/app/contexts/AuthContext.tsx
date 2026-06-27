@@ -23,6 +23,8 @@ export type Perfil = {
   jogos_completados: number;
   missoes_concluidas: SlugMissao[];
   papel: PapelUsuario;
+  instituicao?: string | null;
+  materia?: string | null;
 };
 
 type AuthContextValue = {
@@ -53,45 +55,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPerfil(null);
       return;
     }
-    const { data, error } = await supabase
+
+    function montarPerfil(
+      row: Record<string, unknown>,
+      missoesFallback?: SlugMissao[],
+    ): Perfil {
+      return {
+        id: row.id as string,
+        nome: row.nome as string,
+        email: row.email as string,
+        foto_url: (row.foto_url as string | null) ?? null,
+        pontos: (row.pontos as number) ?? 0,
+        jogos_completados: (row.jogos_completados as number) ?? 0,
+        missoes_concluidas:
+          (row.missoes_concluidas as SlugMissao[] | undefined) ??
+          missoesFallback ??
+          lerMissoesLocais(userId),
+        papel: (row.papel as PapelUsuario) ?? 'aluno',
+        instituicao: (row.instituicao as string | null | undefined) ?? null,
+        materia: (row.materia as string | null | undefined) ?? null,
+      };
+    }
+
+    const selectCompleto =
+      'id, nome, email, foto_url, pontos, jogos_completados, missoes_concluidas, papel, instituicao, materia';
+    const selectSemProfessor =
+      'id, nome, email, foto_url, pontos, jogos_completados, missoes_concluidas, papel';
+    const selectBasico = 'id, nome, email, foto_url, pontos, jogos_completados, papel';
+    const selectMinimo = 'id, nome, email, foto_url, pontos, jogos_completados';
+
+    let { data, error } = await supabase
       .from('perfis')
-      .select('id, nome, email, foto_url, pontos, jogos_completados, missoes_concluidas, papel')
+      .select(selectCompleto)
       .eq('id', userId)
       .maybeSingle();
+
+    if (
+      error?.message?.includes('instituicao') ||
+      error?.message?.includes('materia')
+    ) {
+      ({ data, error } = await supabase
+        .from('perfis')
+        .select(selectSemProfessor)
+        .eq('id', userId)
+        .maybeSingle());
+    }
 
     if (error?.message?.includes('missoes_concluidas') || error?.message?.includes('papel')) {
       const { data: basico, error: erroBasico } = await supabase
         .from('perfis')
-        .select('id, nome, email, foto_url, pontos, jogos_completados, papel')
+        .select(selectBasico)
         .eq('id', userId)
         .maybeSingle();
 
       if (!erroBasico && basico) {
-        setPerfil({
-          ...basico,
-          pontos: basico.pontos ?? 0,
-          jogos_completados: basico.jogos_completados ?? 0,
-          missoes_concluidas: lerMissoesLocais(userId),
-          papel: (basico.papel as PapelUsuario) ?? 'aluno',
-        });
+        setPerfil(montarPerfil(basico as Record<string, unknown>, lerMissoesLocais(userId)));
         return;
       }
 
       const { data: minimo } = await supabase
         .from('perfis')
-        .select('id, nome, email, foto_url, pontos, jogos_completados')
+        .select(selectMinimo)
         .eq('id', userId)
         .maybeSingle();
 
       setPerfil(
         minimo
-          ? {
-              ...minimo,
-              pontos: minimo.pontos ?? 0,
-              jogos_completados: minimo.jogos_completados ?? 0,
-              missoes_concluidas: lerMissoesLocais(userId),
-              papel: 'aluno',
-            }
+          ? montarPerfil(minimo as Record<string, unknown>, lerMissoesLocais(userId))
           : null,
       );
       return;
@@ -102,17 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setPerfil(
-      data
-        ? {
-            ...data,
-            pontos: data.pontos ?? 0,
-            jogos_completados: data.jogos_completados ?? 0,
-            missoes_concluidas: (data.missoes_concluidas ?? lerMissoesLocais(userId)) as SlugMissao[],
-            papel: (data.papel as PapelUsuario) ?? 'aluno',
-          }
-        : null,
-    );
+    setPerfil(data ? montarPerfil(data as Record<string, unknown>) : null);
   }, []);
 
   const recarregarPerfil = useCallback(async () => {
