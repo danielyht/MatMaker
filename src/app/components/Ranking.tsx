@@ -301,7 +301,6 @@ export function Ranking() {
           ) : visualizacao === 'podio' && restanteLista.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 py-6 text-center">
               <p className="text-sm font-medium text-[#64748B]">
-                O pódio está completo — só os três primeiros por enquanto.
               </p>
             </div>
           ) : (
